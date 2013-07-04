@@ -1,6 +1,8 @@
 using System;
 using System.Reflection;
+using System.Collections.Generic;
 using UnityEngine;
+
 
 namespace ControllerSupport {
 	public class BattleModeWrapper {
@@ -8,6 +10,7 @@ namespace ControllerSupport {
 		private HandManager handManager;
 		private MethodInfo cardClickedMethodInfo;
 		private MethodInfo toggleUnitStatsMethodInfo;
+		private MethodInfo deselectAllTilesMethodInfo;
 		private GUIBattleModeMenu gameMenu;
 		private bool controlBoard = false;
 		private int tileRow = 2;
@@ -19,6 +22,7 @@ namespace ControllerSupport {
 			this.handManager = GetHandManager ();
 			cardClickedMethodInfo = battleMode.GetType().GetMethod("cardClicked", BindingFlags.NonPublic | BindingFlags.Instance);
 			toggleUnitStatsMethodInfo = battleMode.GetType().GetMethod("toggleUnitStats", BindingFlags.NonPublic | BindingFlags.Instance);
+			deselectAllTilesMethodInfo = battleMode.GetType ().GetMethod ("deselectAllTiles", BindingFlags.NonPublic | BindingFlags.Instance);
 			gameMenu = (GUIBattleModeMenu)typeof(BattleMode).GetField ("menu", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
 		}
 
@@ -55,7 +59,8 @@ namespace ControllerSupport {
 		}
 		public void TakeControlOfHand() {
 			controlBoard = false;
-			TileOut ();
+			DeselectAllTiles ();
+			battleMode.HideCardView ();
 			handManager.SetCardsGrayedOut (false);
 		}
 
@@ -95,8 +100,59 @@ namespace ControllerSupport {
 		public void TileClicked () {
 			Tile t = GetTile ();
 			if (t != null) {
+				List<List<Tile>> tileSelectionList = new List<List<Tile>> ((List<List<Tile>>)typeof(BattleMode).GetField ("tileSelectionList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode));
+				// Check if we are placing a unit.
+				bool didPlaceUnit = false;
+				if (handManager.GetSelectedCard () != null) {
+					if (battleMode.isTileInList (t, tileSelectionList)) {
+						Console.WriteLine ("ControllerSupport: TileClicked() tileSelectionList: " + tileSelectionList);
+						tileSelectionList.RemoveAt (0);
+						if (tileSelectionList.Count == 0) {
+							Console.WriteLine ("ControllerSupport: TileClicked() tileSelectionList.Count == 0!");
+							didPlaceUnit = true;
+						}
+					}
+				} else {
+					string activeAbilityId = (string)typeof(BattleMode).GetField ("activeAbilityId", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+					Console.WriteLine ("ControllerSupport: TileClicked() This is called when no card is selected :D");
+					if (activeAbilityId != string.Empty && activeAbilityId != null) {
+						tileSelectionList.RemoveAt (0);
+						if (tileSelectionList.Count == 0) {
+							Console.WriteLine ("ControllerSupport: TileClicked() AAAAAAAAAAAAAAAAAAAAAAA"); // <- move
+						} else {
+							Console.WriteLine ("ControllerSupport: TileClicked() BBBBBBBBBBBBBBBBBBBBBBB");
+						}
+					} else {
+						Console.WriteLine ("ControllerSupport: TileClicked() CCCCCCCCCCCCCCCCCCCCCCCCC"); // <- empty space, enemy unit, allied unit
+					}
+					// this should do the following:
+					// check if we are selecting a unit
+					// check if we previously selected a unit
+					// check if we selected an empty tile
+					// if we have no previously selected unit AND we selected an empty tile: battleMode.HideCardView ();
+				}
 				battleMode.tileClicked(t);
+				// Return control back to the hand if we placed a unit.
+				if (didPlaceUnit) {
+					TakeControlOfHand ();
+				}
 			}
+		}
+
+		public bool UnitSelectedOnBoard() {
+			if (handManager.GetSelectedCard () == null) {
+				List<List<Tile>> tileSelectionList = new List<List<Tile>> ((List<List<Tile>>)typeof(BattleMode).GetField ("tileSelectionList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode));
+				string activeAbilityId = (string)typeof(BattleMode).GetField ("activeAbilityId", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+				if (activeAbilityId != string.Empty && activeAbilityId != null) {
+					tileSelectionList.RemoveAt (0);
+					if (tileSelectionList.Count == 0) {
+						Console.WriteLine ("ControllerSupport: UnitSelectedOnBoard() ******* THERE WAS A UNIT SELECTED ******"); // <- move
+						return true;
+					}
+				}
+			}
+			Console.WriteLine ("ControllerSupport: UnitSelectedOnBoard() ******* THERE WAS NO!!! UNIT SELECTED ******"); // <- move
+			return false;
 		}
 
 		private void TileOver() {
@@ -110,6 +166,11 @@ namespace ControllerSupport {
 			if (t != null) {
 				battleMode.tileOut (t.gameObject, tileRow, tileColumn);
 			}
+		}
+
+		public void DeselectAllTiles() {
+			battleMode.HideCardView ();
+			deselectAllTilesMethodInfo.Invoke (battleMode, new object[] { });
 		}
 
 		private Tile GetTile() {

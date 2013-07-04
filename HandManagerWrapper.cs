@@ -17,8 +17,13 @@ namespace ControllerSupport {
 		}
 
 		public void SelectNextCard(int displacement) {
-			// If a next card was previously reserved, ignore this call.
-			if (nextCardReserved) {
+			// If a next card was previously reserved and we are pressing right, ignore this call.
+			// This is to prevent the following: 
+			// We have cards 1 2 3 4 in hand.
+			// We play 2, 3 gets reserved and set as active (since otherwise we lose our index)
+			// If we would not reserve and we press right, we immediatly jump to card 4 which feels unnatural.
+			// Similarely if the displacement is -1 we DO want to ignore the reservation and select card 1.
+			if (displacement == 1 && nextCardReserved) {
 				nextCardReserved = false;
 				return;
 			}

@@ -10,10 +10,14 @@ namespace ControllerSupport
 	public class ControllerSupport : BaseMod {
 		private BattleModeWrapper battleMode = null;
 		private HandManagerWrapper handManager = null;
+		private ControllerKeyBindings controllerBindings;
+		private const float axisDelay = .2f;
+		private float axisDeltaTime = 1000.0f;
 
 		//initialize everything here, Game is loaded at this point
 		public ControllerSupport () {
 			Console.WriteLine("Loaded mod ControllerSupport");
+			controllerBindings = new ControllerKeyBindings ();
 		}
 
 		public static string GetName () {
@@ -42,80 +46,103 @@ namespace ControllerSupport
 					battleMode = new BattleModeWrapper((BattleMode)info.target);
 					handManager = new HandManagerWrapper(battleMode.GetHandManager());
 				}
-				// Xbox Controls : Windows
-				if (OsSpec.getOS () == OSType.Windows) {
+
+				// Update the Axis delta time. (Used to control how often axis input is registered)
+				axisDeltaTime += Time.deltaTime;
+
+				// Check if the Modifier Key is down
+				if (Input.GetKey(controllerBindings.LB)) {
+					// Sacrifice for Growth
+					if (Input.GetKeyUp (controllerBindings.A)) {
+						HandleInput ("SacGrowth");
+					}
+					// Sacrifice for Order
+					if (Input.GetKeyUp (controllerBindings.X)) {
+						HandleInput ("SacOrder");
+					}
+					// Sacrifice for Energy
+					if (Input.GetKeyUp (controllerBindings.Y)) {
+						HandleInput ("SacEnergy");
+					}
+					// Sacrifice for Scrolls
+					if (Input.GetKeyUp (controllerBindings.B)) {
+						HandleInput ("Cycle");
+					}
+				} else {
+					// End Turn
+					if (Input.GetKeyUp (controllerBindings.Y)) {
+						HandleInput ("EndTurn");
+					}
+					// Show Menu
+					if (Input.GetKeyUp (controllerBindings.START)) {
+						HandleInput ("ShowMenu");
+					}
+					// Toggle Show Stats
+					if (Input.GetKeyUp (controllerBindings.RIGHT_STICK_CLICK)) {
+						HandleInput ("ToggleUnitStats");
+					}
+					// Magnify Selected Card
+					if (Input.GetKeyUp (controllerBindings.RB)) {
+						HandleInput ("MagnifySelected");
+					}
+					// Accept
+					if (Input.GetKeyUp (controllerBindings.A)) {
+						HandleInput ("Accept");
+					}
+					// Cancel
+					if (Input.GetKeyUp (controllerBindings.B)) {
+						HandleInput ("Cancel");
+					}
+					// Right
+					if (axisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {
+						axisDeltaTime = .0f;
+						HandleInput ("Right");
+					}
+					// Left
+					if (axisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) < -0.5f) {
+						axisDeltaTime = .0f;
+						HandleInput ("Left");
+					}
+					// Up
+					if (axisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) > .5f) {
+						axisDeltaTime = .0f;
+						HandleInput ("Up");
+					}
+					// Down
+					if (axisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) < -0.5f) {
+						axisDeltaTime = .0f;
+						HandleInput ("Down");
+					}
+
+					// Control Board (Xbox:Left Stick Click)
+					if (Input.GetKeyDown (controllerBindings.LEFT_STICK_CLICK)) {
+						HandleInput ("ControlBoard");
+					}
+
 				}
 
-				// Xbox Controls : OSX
+				// Windows Specific Controller Controls
+				if (OsSpec.getOS () == OSType.Windows) {}
+
+				// OSX Specific Controller DPAD Controls (as they are buttons in OSX and an axis in Windows).
 				if (OsSpec.getOS () == OSType.OSX) {
-					// Check if the Modifier Key is down (Xbox:LB)
-					if (Input.GetKey("joystick button 13")) {
-						// Sacrifice for Growth (Xbox:LB + A)
-						if (Input.GetKeyUp ("joystick button 16")) {
-							HandleInput ("SacGrowth");
-						}
-						// Sacrifice for Order (Xbox:LB + X)
-						if (Input.GetKeyUp ("joystick button 18")) {
-							HandleInput ("SacOrder");
-						}
-						// Sacrifice for Energy (Xbox:LB + Y)
-						if (Input.GetKeyUp ("joystick button 19")) {
-							HandleInput ("SacEnergy");
-						}
-						// Sacrifice for Scrolls (Xbox:LB + B)
-						if (Input.GetKeyUp ("joystick button 17")) {
-							HandleInput ("Cycle");
-						}
-					} else {
-						// End Turn (Xbox:Y)
-						if (Input.GetKeyUp ("joystick button 19")) {
-							HandleInput ("EndTurn");
-						}
-						// Show Menu (Xbox:Start)
-						if (Input.GetKeyUp ("joystick button 9")) {
-							HandleInput ("ShowMenu");
-						}
-						// Toggle Show Stats (Xbox:Right Stick Click)
-						if (Input.GetKeyUp ("joystick button 12")) {
-							HandleInput ("ToggleUnitStats");
-						}
-						// Magnify Selected Card (Xbox:RT)
-						if (Input.GetKeyUp ("joystick button 14")) {
-							HandleInput ("MagnifySelected");
-						}
-						// Accept (Xbox: A)
-						if (Input.GetKeyUp ("joystick button 16")) {
-							HandleInput ("Accept");
-						}
-						// Cancel (Xbox: B)
-						if (Input.GetKeyUp ("joystick button 17")) {
-							HandleInput ("Cancel");
-						}
-						// Right (Xbox:DPadR / LeftStickR)
-						if (Input.GetKeyDown ("joystick button 8")) {
-							HandleInput ("Right");
-						}
-						// Left (Xbox:DPadL / LeftStickL)
-						if (Input.GetKeyDown ("joystick button 7")) {
-							HandleInput ("Left");
-						}
-						// Up (Xbox:DPadU / LeftStickU)
-						if (Input.GetKeyDown ("joystick button 5")) {
-							HandleInput ("Up");
-						}
-						// Down (Xbox:DPadD / LeftStickD)
-						if (Input.GetKeyDown ("joystick button 6")) {
-							HandleInput ("Down");
-						}
-						// Control Board (Xbox:Left Stick Click)
-						if (Input.GetKeyDown ("joystick button 11")) {
-							HandleInput ("ControlBoard");
-						}
+					// Right
+					if (Input.GetKeyDown (controllerBindings.DPAD_RIGHT)) {
+						HandleInput ("Right");
+					}
+					// Left
+					if (Input.GetKeyDown (controllerBindings.DPAD_LEFT)) {
+						HandleInput ("Left");
+					}
+					// Up
+					if (Input.GetKeyDown (controllerBindings.DPAD_UP)) {
+						HandleInput ("Up");
+					}
+					// Down
+					if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
+						HandleInput ("Down");
 					}
 				}
-
-				// PC Controls
-
 			}
 			returnValue = null;
 			return false;
@@ -166,8 +193,12 @@ namespace ControllerSupport
 					// Deselect the selected card if controlling the hand.
 					handManager.DeselectCard ();
 				} else if (controlBoard) {
-					// If controlling the board, go back to controlling the hand.
-					battleMode.TakeControlOfHand ();
+					// If a unit is selected, unselect all units. Else go back to controlling the hand.
+					if (battleMode.UnitSelectedOnBoard ()) {
+						battleMode.DeselectAllTiles ();
+					} else {
+						battleMode.TakeControlOfHand ();
+					}
 				}
 				break;
 			case "Right":

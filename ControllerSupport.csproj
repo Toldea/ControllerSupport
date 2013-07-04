@@ -54,6 +54,7 @@
     <Compile Include="BattleModeWrapper.cs" />
     <Compile Include="HandManagerWrapper.cs" />
     <Compile Include="ControllerSupport.cs" />
+    <Compile Include="ControllerKeyBindings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
