@@ -7,8 +7,11 @@ namespace ControllerSupport {
 		public EndGameScreenWrapper (EndGameScreen endGameScreen) {
 			this.endGameScreen = endGameScreen;
 		}
-		public bool isInited() {
-			return endGameScreen.isInited ();
+		public bool isActive() {
+			return (endGameScreen.isInited () && !endGameScreen.isDone());
+		}
+		public bool isDone() {
+			return endGameScreen.isDone ();
 		}
 		public void ExitScreen() {
 			Console.WriteLine ("ControllerSupport: Exiting EndGame screen!");

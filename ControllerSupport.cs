@@ -47,10 +47,10 @@ namespace ControllerSupport
 		}
 
 		public override bool BeforeInvoke(InvocationInfo info, out object returnValue) {
-			if (info.targetMethod.Equals ("handleInput")) {
+			if (info.target.GetType () == typeof(BattleMode) && info.targetMethod.Equals ("handleInput")) {
 				if (info.target.GetType () == typeof(BattleMode) && battleMode == null) {
 					battleMode = new BattleModeWrapper ((BattleMode)info.target);
-					handManager = new HandManagerWrapper (battleMode.GetHandManager ());
+					handManager = new HandManagerWrapper (battleMode.GetHandManager());
 				}
 				HandleBattleModeControls ();
 			} else if (info.target.GetType () == typeof(EndGameScreen) && info.targetMethod.Equals ("OnGUI")) {
@@ -78,7 +78,7 @@ namespace ControllerSupport
 
 		private void HandleBattleModeControls() {
 			// If the end screen is linked and it 'active', disable battle mode controls.
-			if (endGameScreen != null && endGameScreen.isInited ()) {
+			if (endGameScreen.isActive ()) {
 				return;
 			}
 			// Update the Axis delta time. (Used to control how often axis input is registered)
@@ -166,7 +166,6 @@ namespace ControllerSupport
 				if (Input.GetKeyDown (controllerBindings.LEFT_STICK_CLICK)) {
 					HandleBattleModeInput ("ControlBoard");
 				}
-
 			}
 
 			// Windows Specific Controller Controls
@@ -196,9 +195,10 @@ namespace ControllerSupport
 		private void HandleEndGameScreenControls() {
 			// Check to see if the end screen is already 'inited'.
 			// This because the object itself is created at the start of the battle, and otherwise we would be able to instantly end the game.
-			if (endGameScreen.isInited ()) {
+			if (endGameScreen.isActive ()) {
 				if (Input.GetKeyDown (controllerBindings.A)) {
 					endGameScreen.ExitScreen ();
+					Console.WriteLine ("ControllerSupport: Exiting EndGameScreen!");
 				}
 			}
 		}
@@ -276,8 +276,9 @@ namespace ControllerSupport
 				break;
 			case "Cancel":
 				if (controlHand) {
-					// Deselect the selected card if controlling the hand.
+					// Deselect the selected card and all tiles if controlling the hand.
 					handManager.DeselectCard ();
+					battleMode.DeselectAllTiles ();
 				} else if (controlBoard) {
 					// If a unit is selected, unselect all units. Else go back to controlling the hand.
 					if (battleMode.UnitSelectedOnBoard ()) {
@@ -321,6 +322,7 @@ namespace ControllerSupport
 			case "ControlBoard":
 				if (controlHand) {
 					battleMode.TakeControlOfBoard ();
+					battleMode.DeselectAllTiles ();
 					handManager.DeselectCard ();
 				}
 				break;

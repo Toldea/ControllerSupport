@@ -27,7 +27,9 @@ namespace ControllerSupport {
 		}
 
 		public void CardClicked(CardView cardView, int mouseButton) {
-			cardClickedMethodInfo.Invoke (battleMode, new object[] { cardView, mouseButton });
+			if (cardClickedMethodInfo != null) {
+				cardClickedMethodInfo.Invoke (battleMode, new object[] { cardView, mouseButton });
+			}
 		}
 
 		public void EndTurnPressed() {
@@ -98,71 +100,53 @@ namespace ControllerSupport {
 		}
 
 		public void TileClicked () {
-			Tile t = GetTile ();
-			if (t != null) {
+			Tile tile = GetTile ();
+			if (tile != null) {
+				// Get the list of all valid tiles to do the currently active ability on (play scroll, move, etc.).
 				List<List<Tile>> tileSelectionList = new List<List<Tile>> ((List<List<Tile>>)typeof(BattleMode).GetField ("tileSelectionList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode));
-				// Check if we are placing a unit or activating an ability.
 				bool didPlaceUnit = false;
 				bool didActivateAbility = false;
+				// Check if we are trying to play a card from hand on the battlefield (i.e. units / targeted spells / enchantments).
 				if (handManager.GetSelectedCard () != null) {
-					if (battleMode.isTileInList (t, tileSelectionList)) {
-						Console.WriteLine ("ControllerSupport: TileClicked() tileSelectionList: " + tileSelectionList);
+					if (battleMode.isTileInList (tile, tileSelectionList)) {
+						//Console.WriteLine ("ControllerSupport: TileClicked() tileSelectionList: " + tileSelectionList);
 						tileSelectionList.RemoveAt (0);
 						if (tileSelectionList.Count == 0) {
-							Console.WriteLine ("ControllerSupport: TileClicked() tileSelectionList.Count == 0!");
+							//Console.WriteLine ("ControllerSupport: TileClicked() tileSelectionList.Count == 0!");
 							didPlaceUnit = true;
 						}
 					}
 				} else {
-					string activeAbilityId = (string)typeof(BattleMode).GetField ("activeAbilityId", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
-					Console.WriteLine ("ControllerSupport: TileClicked() This is called when no card is selected :D");
-					if (activeAbilityId != string.Empty && activeAbilityId != null) {
-						//tileSelectionList.RemoveAt (0);
-						//if (tileSelectionList.Count == 0) {
-							Console.WriteLine ("ControllerSupport: TileClicked() AAAAAAAAAAAAAAAAAAAAAAA"); // <- move
-
-							// Check if the currently selected unit has an activatable ability and if so activate it.
-							GameObject cardRule = (GameObject)typeof(BattleMode).GetField ("cardRule", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
-							if (cardRule != null) {
-								CardView cardView = cardRule.GetComponent<CardView> ();
-								if (cardView != null) {
-									ActiveAbility[] activeAbilities = cardView.getCardInfo().getActiveAbilities ();
-									if (activeAbilities != null) {
-										for (int j = 0; j < activeAbilities.Length; j++) {
-											ActiveAbility activeAbility = activeAbilities [j];
-											if (!(activeAbility.name == "Move")) {
-												TilePosition pos = (TilePosition)typeof(CardView).GetField ("pos", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (cardView);
-												if (pos != null) {
-													battleMode.ActivateTriggeredAbility (activeAbility.id, pos);
-													battleMode.HideCardView ();
-													didActivateAbility = true;
-												}
+					// Get the position of the currently active ability and check if it is the same as the currently selected tile.
+					TilePosition activeAbilityPosition = (TilePosition)typeof(BattleMode).GetField ("activeAbilityPosition", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+					if (activeAbilityPosition.Equals (battleMode.getPosition (tile))) {
+						GameObject cardRule = (GameObject)typeof(BattleMode).GetField ("cardRule", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+						if (cardRule != null) {
+							CardView cardView = cardRule.GetComponent<CardView> ();
+							if (cardView != null) {
+								// Disect the scroll's activatable abilities from it. If it contains a non-move ability (i.e. summon wolf), activate it.
+								ActiveAbility[] activeAbilities = cardView.getCardInfo ().getActiveAbilities ();
+								if (activeAbilities != null) {
+									for (int j = 0; j < activeAbilities.Length; j++) {
+										ActiveAbility activeAbility = activeAbilities [j];
+										if (!(activeAbility.name == "Move")) {
+											TilePosition pos = (TilePosition)typeof(CardView).GetField ("pos", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (cardView);
+											if (pos != null) {
+												//Console.WriteLine ("ControllerSupport: Activating Ability: " + activeAbility.description);
+												battleMode.ActivateTriggeredAbility (activeAbility.id, pos);
+												battleMode.HideCardView ();
+												didActivateAbility = true;
 											}
 										}
 									}
 								}
 							}
-							//
-
-
-
-
-
-						//} else {
-							Console.WriteLine ("ControllerSupport: TileClicked() BBBBBBBBBBBBBBBBBBBBBBB");
-						//}
-					} else {
-						Console.WriteLine ("ControllerSupport: TileClicked() CCCCCCCCCCCCCCCCCCCCCCCCC"); // <- empty space, enemy unit, allied unit
+						}
 					}
-					// this should do the following:
-					// check if we are selecting a unit
-					// check if we previously selected a unit
-					// check if we selected an empty tile
-					// if we have no previously selected unit AND we selected an empty tile: battleMode.HideCardView ();
 				}
 				// 'Click' on the currently highlighted tile if we didn't activate a unit's activated ability.
 				if (!didActivateAbility) {
-					battleMode.tileClicked(t);
+					battleMode.tileClicked(tile);
 				}
 				// Return control back to the hand if we placed a unit.
 				if (didPlaceUnit) {
@@ -173,14 +157,14 @@ namespace ControllerSupport {
 
 		public bool UnitSelectedOnBoard() {
 			if (handManager.GetSelectedCard () == null) {
-				List<List<Tile>> tileSelectionList = new List<List<Tile>> ((List<List<Tile>>)typeof(BattleMode).GetField ("tileSelectionList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode));
+				//List<List<Tile>> tileSelectionList = new List<List<Tile>> ((List<List<Tile>>)typeof(BattleMode).GetField ("tileSelectionList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode));
 				string activeAbilityId = (string)typeof(BattleMode).GetField ("activeAbilityId", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
 				if (activeAbilityId != string.Empty && activeAbilityId != null) {
-					tileSelectionList.RemoveAt (0);
-					if (tileSelectionList.Count == 0) {
+					//tileSelectionList.RemoveAt (0);
+					//if (tileSelectionList.Count == 0) {
 						Console.WriteLine ("ControllerSupport: UnitSelectedOnBoard() ******* THERE WAS A UNIT SELECTED ******"); // <- move
 						return true;
-					}
+					//}
 				}
 			}
 			Console.WriteLine ("ControllerSupport: UnitSelectedOnBoard() ******* THERE WAS NO!!! UNIT SELECTED ******"); // <- move
