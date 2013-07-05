@@ -187,6 +187,10 @@ namespace ControllerSupport {
 			return false;
 		}
 
+		public void SendChatMessage(string message) {
+			battleMode.GetType ().GetMethod ("sendBattleRequest", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (battleMode, new object[] {new GameChatMessageMessage (message) });
+		}
+
 		private void TileOver() {
 			Tile t = GetTile ();
 			if (t != null) {

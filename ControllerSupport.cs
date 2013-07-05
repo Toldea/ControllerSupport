@@ -12,6 +12,7 @@ namespace ControllerSupport
 		private HandManagerWrapper handManager = null;
 		private EndGameScreenWrapper endGameScreen = null;
 		private LobbyMenuWrapper lobbyMenu = null;
+		private LoginWrapper login = null;
 		private ControllerKeyBindings controllerBindings;
 		private const float axisDelay = .2f;
 		private float axisDeltaTime = 1000.0f;
@@ -37,6 +38,7 @@ namespace ControllerSupport
 					scrollsTypes["BattleMode"].Methods.GetMethod("handleInput")[0],
 					scrollsTypes["EndGameScreen"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("Update")[0],
+					scrollsTypes["Login"].Methods.GetMethod("OnGUI")[0],
 				};
 			}
 			catch {
@@ -45,22 +47,27 @@ namespace ControllerSupport
 		}
 
 		public override bool BeforeInvoke(InvocationInfo info, out object returnValue) {
-			if (info.targetMethod.Equals("handleInput")) {
-				if (battleMode == null) {
-					battleMode = new BattleModeWrapper((BattleMode)info.target);
-					handManager = new HandManagerWrapper(battleMode.GetHandManager());
+			if (info.targetMethod.Equals ("handleInput")) {
+				if (info.target.GetType () == typeof(BattleMode) && battleMode == null) {
+					battleMode = new BattleModeWrapper ((BattleMode)info.target);
+					handManager = new HandManagerWrapper (battleMode.GetHandManager ());
 				}
 				HandleBattleModeControls ();
-			} else if (info.targetMethod.Equals("OnGUI")) {
+			} else if (info.target.GetType () == typeof(EndGameScreen) && info.targetMethod.Equals ("OnGUI")) {
 				if (endGameScreen == null) {
 					endGameScreen = new EndGameScreenWrapper ((EndGameScreen)info.target);
 				}
-				HandleEndGameScreenControls();
-			} else if (info.targetMethod.Equals("Update")) {
+				HandleEndGameScreenControls ();
+			} else if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("Update")) {
 				if (lobbyMenu == null) {
 					lobbyMenu = new LobbyMenuWrapper ();
 				}
 				HandleLobbyMenuControls ();
+			} else if (info.target.GetType () == typeof(Login) && info.targetMethod.Equals ("OnGUI")) {
+				if (login == null) {
+					login = new LoginWrapper ((Login)info.target);
+				}
+				HandleLoginControls ();
 			}
 			returnValue = null;
 			return false;
@@ -78,7 +85,7 @@ namespace ControllerSupport
 			axisDeltaTime += Time.deltaTime;
 
 			// Check if the Modifier Key is down
-			if (Input.GetKey(controllerBindings.LB)) {
+			if (Input.GetKey (controllerBindings.LB)) {
 				// Sacrifice for Growth
 				if (Input.GetKeyUp (controllerBindings.A)) {
 					HandleBattleModeInput ("SacGrowth");
@@ -94,6 +101,20 @@ namespace ControllerSupport
 				// Sacrifice for Scrolls
 				if (Input.GetKeyUp (controllerBindings.B)) {
 					HandleBattleModeInput ("Cycle");
+				}
+			} else if (Input.GetKey(controllerBindings.BACK)) {
+				// Hotkeys for sending some basic chat messages.
+				if (Input.GetKeyUp (controllerBindings.A)) {
+					battleMode.SendChatMessage("Hello and good luck.");
+				}
+				if (Input.GetKeyUp (controllerBindings.B)) {
+					battleMode.SendChatMessage ("Good Game.");
+				}
+				if (Input.GetKeyUp (controllerBindings.X)) {
+					battleMode.SendChatMessage ("Nice play!");
+				}
+				if (Input.GetKeyUp (controllerBindings.Y)) {
+					battleMode.SendChatMessage (":)");
 				}
 			} else {
 				// End Turn
@@ -184,10 +205,35 @@ namespace ControllerSupport
 
 		private void HandleLobbyMenuControls () {
 			if (Input.GetKeyUp(controllerBindings.RB)) {
-				lobbyMenu.OpenNextScene ();
+				lobbyMenu.HandleInput ("NextScene");
 			}
 			if (Input.GetKeyUp(controllerBindings.LB)) {
-				lobbyMenu.OpenPreviousScene ();
+				lobbyMenu.HandleInput ("PreviousScene");
+			}
+			if (Input.GetKeyUp (controllerBindings.A)) {
+				lobbyMenu.HandleInput ("Accept");
+			}
+			if (Input.GetKeyUp (controllerBindings.B)) {
+				lobbyMenu.HandleInput ("Cancel");
+			}
+			/*
+			if (Input.GetKeyDown (controllerBindings.DPAD_RIGHT)) {
+				lobbyMenu.HandleInput ("Right");
+			}
+			if (Input.GetKeyDown (controllerBindings.DPAD_LEFT)) {
+				lobbyMenu.HandleInput ("Left");
+			}
+			if (Input.GetKeyDown (controllerBindings.DPAD_UP)) {
+				lobbyMenu.HandleInput ("Up");
+			}
+			if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
+				lobbyMenu.HandleInput ("Down");
+			}*/
+		}
+
+		private void HandleLoginControls () {
+			if (Input.GetKeyUp (controllerBindings.A) || Input.GetKeyUp (controllerBindings.START)) {
+				login.Login ();
 			}
 		}
 

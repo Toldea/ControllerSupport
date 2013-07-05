@@ -57,6 +57,7 @@
     <Compile Include="ControllerKeyBindings.cs" />
     <Compile Include="EndGameScreenWrapper.cs" />
     <Compile Include="LobbyMenuWrapper.cs" />
+    <Compile Include="LoginWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

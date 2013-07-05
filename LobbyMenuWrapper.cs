@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using UnityEngine;
 
 namespace ControllerSupport {
 	public class LobbyMenuWrapper {
@@ -13,11 +14,28 @@ namespace ControllerSupport {
 			fadeOutSceneMethodInfo = lobbyMenu.GetType ().GetMethod ("fadeOutScene", BindingFlags.NonPublic | BindingFlags.Instance);
 		}
 
-		public void OpenNextScene() {
-			OpenScene (GetNextScene (GetCurrentSceneName()));
-		}
-		public void OpenPreviousScene() {
-			OpenScene (GetPreviousScene (GetCurrentSceneName()));
+		public void HandleInput(string inputType) {
+			//int currentSceneIndex = GetCurrentSceneIndex (GetCurrentSceneName());
+			switch (inputType) {
+			case "NextScene":
+				OpenScene (GetNextScene (GetCurrentSceneName()));
+				break;
+			case "PreviousScene":
+				OpenScene (GetPreviousScene (GetCurrentSceneName()));
+				break;
+			case "Accept":
+				break;
+			case "Cancel":
+				break;
+			case "Right":
+				break;
+			case "Left":
+				break;
+			case "Up":
+				break;
+			case "Down":
+				break;
+			}
 		}
 
 		private void OpenScene(string sceneName) {
@@ -26,7 +44,6 @@ namespace ControllerSupport {
 				App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
 				fadeOutSceneMethodInfo.Invoke (lobbyMenu, new object[] { });
 				lastScene = sceneName;
-			} else {
 			}
 		}
 

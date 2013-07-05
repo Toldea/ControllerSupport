@@ -34,9 +34,9 @@ namespace ControllerSupport {
 		public string RB {
 			get { return (osType == OSType.Windows) ? "joystick button 5" : "joystick button 14" ; }
 		}
-		//public string BACK {
-		//	get { return (osType == OSType.Windows) ? "joystick button 6" : "joystick button UNKNOWN!!!" ; }
-		//}
+		public string BACK {
+			get { return (osType == OSType.Windows) ? "joystick button 6" : "joystick button 10" ; }
+		}
 		public string START {
 			get { return (osType == OSType.Windows) ? "joystick button 7" : "joystick button 9" ; }
 		}
