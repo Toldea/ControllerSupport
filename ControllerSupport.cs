@@ -11,6 +11,7 @@ namespace ControllerSupport
 		private BattleModeWrapper battleMode = null;
 		private HandManagerWrapper handManager = null;
 		private EndGameScreenWrapper endGameScreen = null;
+		private LobbyMenuWrapper lobbyMenu = null;
 		private ControllerKeyBindings controllerBindings;
 		private const float axisDelay = .2f;
 		private float axisDeltaTime = 1000.0f;
@@ -35,7 +36,7 @@ namespace ControllerSupport
 					// hook handleMessage in battlemode for adding input methods.
 					scrollsTypes["BattleMode"].Methods.GetMethod("handleInput")[0],
 					scrollsTypes["EndGameScreen"].Methods.GetMethod("OnGUI")[0],
-					scrollsTypes["LobbyMenu"].Methods.GetMethod("menuGUI")[0],
+					scrollsTypes["LobbyMenu"].Methods.GetMethod("Update")[0],
 				};
 			}
 			catch {
@@ -55,17 +56,11 @@ namespace ControllerSupport
 					endGameScreen = new EndGameScreenWrapper ((EndGameScreen)info.target);
 				}
 				HandleEndGameScreenControls();
-			} else if (info.targetMethod.Equals("menuGUI")) {
-				/*
-				if (Input.GetKeyUp(controllerBindings.RB)) {
-					Console.WriteLine("ControllerSupport: Pressing RB in menuGUI :D");
-					LobbyMenu menu = App.LobbyMenu;
-					if (menu != null) {
-						typeof(LobbyMenu).GetField ("_sceneToLoad", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (menu, "_Lobby");
-						App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
-						menu.GetType().GetMethod("fadeOutScene", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(menu, new object[]{});
-					}
-				}*/
+			} else if (info.targetMethod.Equals("Update")) {
+				if (lobbyMenu == null) {
+					lobbyMenu = new LobbyMenuWrapper ();
+				}
+				HandleLobbyMenuControls ();
 			}
 			returnValue = null;
 			return false;
@@ -86,69 +81,69 @@ namespace ControllerSupport
 			if (Input.GetKey(controllerBindings.LB)) {
 				// Sacrifice for Growth
 				if (Input.GetKeyUp (controllerBindings.A)) {
-					HandleInput ("SacGrowth");
+					HandleBattleModeInput ("SacGrowth");
 				}
 				// Sacrifice for Order
 				if (Input.GetKeyUp (controllerBindings.X)) {
-					HandleInput ("SacOrder");
+					HandleBattleModeInput ("SacOrder");
 				}
 				// Sacrifice for Energy
 				if (Input.GetKeyUp (controllerBindings.Y)) {
-					HandleInput ("SacEnergy");
+					HandleBattleModeInput ("SacEnergy");
 				}
 				// Sacrifice for Scrolls
 				if (Input.GetKeyUp (controllerBindings.B)) {
-					HandleInput ("Cycle");
+					HandleBattleModeInput ("Cycle");
 				}
 			} else {
 				// End Turn
 				if (Input.GetKeyUp (controllerBindings.Y)) {
-					HandleInput ("EndTurn");
+					HandleBattleModeInput ("EndTurn");
 				}
 				// Show Menu
 				if (Input.GetKeyUp (controllerBindings.START)) {
-					HandleInput ("ShowMenu");
+					HandleBattleModeInput ("ShowMenu");
 				}
 				// Toggle Show Stats
 				if (Input.GetKeyUp (controllerBindings.RIGHT_STICK_CLICK)) {
-					HandleInput ("ToggleUnitStats");
+					HandleBattleModeInput ("ToggleUnitStats");
 				}
 				// Magnify Selected Card
 				if (Input.GetKeyUp (controllerBindings.RB)) {
-					HandleInput ("MagnifySelected");
+					HandleBattleModeInput ("MagnifySelected");
 				}
 				// Accept
 				if (Input.GetKeyUp (controllerBindings.A)) {
-					HandleInput ("Accept");
+					HandleBattleModeInput ("Accept");
 				}
 				// Cancel
 				if (Input.GetKeyUp (controllerBindings.B)) {
-					HandleInput ("Cancel");
+					HandleBattleModeInput ("Cancel");
 				}
 				// Right
 				if (axisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {
 					axisDeltaTime = .0f;
-					HandleInput ("Right");
+					HandleBattleModeInput ("Right");
 				}
 				// Left
 				if (axisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) < -0.5f) {
 					axisDeltaTime = .0f;
-					HandleInput ("Left");
+					HandleBattleModeInput ("Left");
 				}
 				// Up
 				if (axisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) > .5f) {
 					axisDeltaTime = .0f;
-					HandleInput ("Up");
+					HandleBattleModeInput ("Up");
 				}
 				// Down
 				if (axisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) < -0.5f) {
 					axisDeltaTime = .0f;
-					HandleInput ("Down");
+					HandleBattleModeInput ("Down");
 				}
 
 				// Control Board (Xbox:Left Stick Click)
 				if (Input.GetKeyDown (controllerBindings.LEFT_STICK_CLICK)) {
-					HandleInput ("ControlBoard");
+					HandleBattleModeInput ("ControlBoard");
 				}
 
 			}
@@ -160,19 +155,19 @@ namespace ControllerSupport
 			if (OsSpec.getOS () == OSType.OSX) {
 				// Right
 				if (Input.GetKeyDown (controllerBindings.DPAD_RIGHT)) {
-					HandleInput ("Right");
+					HandleBattleModeInput ("Right");
 				}
 				// Left
 				if (Input.GetKeyDown (controllerBindings.DPAD_LEFT)) {
-					HandleInput ("Left");
+					HandleBattleModeInput ("Left");
 				}
 				// Up
 				if (Input.GetKeyDown (controllerBindings.DPAD_UP)) {
-					HandleInput ("Up");
+					HandleBattleModeInput ("Up");
 				}
 				// Down
 				if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
-					HandleInput ("Down");
+					HandleBattleModeInput ("Down");
 				}
 			}
 		}
@@ -187,7 +182,16 @@ namespace ControllerSupport
 			}
 		}
 
-		private void HandleInput(String inputType) {
+		private void HandleLobbyMenuControls () {
+			if (Input.GetKeyUp(controllerBindings.RB)) {
+				lobbyMenu.OpenNextScene ();
+			}
+			if (Input.GetKeyUp(controllerBindings.LB)) {
+				lobbyMenu.OpenPreviousScene ();
+			}
+		}
+
+		private void HandleBattleModeInput(String inputType) {
 			bool controlBoard = battleMode.InControlOfBoard ();
 			bool controlHand = !controlBoard;
 
