@@ -5,6 +5,16 @@ namespace ControllerSupport {
 	public class EndGameScreenWrapper {
 		private EndGameScreen endGameScreen;
 		public EndGameScreenWrapper (EndGameScreen endGameScreen) {
+			Console.WriteLine ("ControllerSupport: Creating EndGameScreenWrapper Wrapper.");
+			Initialize (endGameScreen);
+		}
+		public void Validate(EndGameScreen endGameScreen) {
+			if (this.endGameScreen == null) {
+				Console.WriteLine ("ControllerSupport: EndGameScreen.Validate: EndGameScreen is invalid, reinitializing..");
+				Initialize (endGameScreen);
+			}
+		}
+		private void Initialize(EndGameScreen endGameScreen) {
 			this.endGameScreen = endGameScreen;
 		}
 		public bool isActive() {

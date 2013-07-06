@@ -34,7 +34,6 @@ namespace ControllerSupport
 		public static MethodDefinition[] GetHooks(TypeDefinitionCollection scrollsTypes, int version) {
 			try {
 				return new MethodDefinition[] { 
-					// hook handleMessage in battlemode for adding input methods.
 					scrollsTypes["BattleMode"].Methods.GetMethod("handleInput")[0],
 					scrollsTypes["EndGameScreen"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("Update")[0],
@@ -59,6 +58,7 @@ namespace ControllerSupport
 				if (endGameScreen == null) {
 					endGameScreen = new EndGameScreenWrapper ((EndGameScreen)info.target);
 				}
+				endGameScreen.Validate((EndGameScreen)info.target);
 				HandleEndGameScreenControls ();
 			} else if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("Update")) {
 				if (lobbyMenu == null) {
@@ -264,7 +264,6 @@ namespace ControllerSupport
 						if (handManager.DoesSelectedSpellHaveCastButton ()) {
 							handManager.UseActiveCard ("play");
 						} else if (handManager.IsSelectedCardPlayableOnBoard ()) { // Check if the scroll is playable on board.
-							Console.WriteLine ("ControllerSupport: Can play currently selected card on board!");
 							battleMode.TakeControlOfBoard ();
 						}
 					} else {
@@ -307,16 +306,12 @@ namespace ControllerSupport
 				}
 				break;
 			case "Up":
-				/*if (controlHand) {
-					battleMode.TakeControlOfBoard ();
-				} else */if (controlBoard) {
+				if (controlBoard) {
 					battleMode.MoveOnBoard (0, -1);
 				}
 				break;
 			case "Down":
-				/*if (controlHand) {
-					battleMode.TakeControlOfBoard ();
-				} else */if (controlBoard) {
+				if (controlBoard) {
 					battleMode.MoveOnBoard (0, 1);
 				}
 				break;

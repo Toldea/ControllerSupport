@@ -18,9 +18,6 @@ namespace ControllerSupport {
 		public void Validate (HandManager handManager) {
 			if (this.handManager == null) {
 				Console.WriteLine ("ControllerSupport: HandManagerWrapper.Validate: HandManager is invalid, reinitializing..");
-				if (handManager == null) {
-					Console.WriteLine ("ControllerSupport: HandManagerWrapper.Validate: parsed HandManager is invalid..");
-				}
 				Initialize (handManager);
 			}
 		}

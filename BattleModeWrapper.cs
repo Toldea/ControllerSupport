@@ -12,9 +12,9 @@ namespace ControllerSupport {
 		private MethodInfo toggleUnitStatsMethodInfo;
 		private MethodInfo deselectAllTilesMethodInfo;
 		private GUIBattleModeMenu gameMenu;
-		private bool controlBoard = false;
-		private int tileRow = 2;
-		private int tileColumn = 1;
+		private bool controlBoard;
+		private int tileRow;
+		private int tileColumn;
 
 		public BattleModeWrapper (BattleMode battleMode) {
 			Console.WriteLine ("ControllerSupport: Creating BattleMode Wrapper.");
@@ -24,9 +24,6 @@ namespace ControllerSupport {
 		public void Validate(BattleMode battleMode) {
 			if (this.battleMode == null || this.handManager == null) {
 				Console.WriteLine ("ControllerSupport: BattleModeWrapper.Validate: BattleMode or HandManager are invalid, reinitializing..");
-				if (battleMode == null) {
-					Console.WriteLine ("ControllerSupport: BattleModeWrapper.Validate: parsed BattleMode is invalid..");
-				}
 				Initialize (battleMode);
 			}
 		}
@@ -38,6 +35,9 @@ namespace ControllerSupport {
 			toggleUnitStatsMethodInfo = battleMode.GetType().GetMethod("toggleUnitStats", BindingFlags.NonPublic | BindingFlags.Instance);
 			deselectAllTilesMethodInfo = battleMode.GetType ().GetMethod ("deselectAllTiles", BindingFlags.NonPublic | BindingFlags.Instance);
 			gameMenu = (GUIBattleModeMenu)typeof(BattleMode).GetField ("menu", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+			controlBoard = false;
+			tileRow = 2;
+			tileColumn = 1;
 		}
 
 		public void CardClicked(CardView cardView, int mouseButton) {
