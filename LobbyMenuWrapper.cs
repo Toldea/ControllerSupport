@@ -3,7 +3,7 @@ using System.Reflection;
 using UnityEngine;
 
 namespace ControllerSupport {
-	public class LobbyMenuWrapper {
+	public class LobbyMenuWrapper : IOkCancelCallback, IOkStringCancelCallback {
 		private LobbyMenu lobbyMenu;
 		private MethodInfo fadeOutSceneMethodInfo;
 		private string[] menuSceneNames = new string[] {"_HomeScreen", "_Lobby", "_DeckBuilderView", "_Store", "_Settings", "_Profile"};
@@ -12,6 +12,23 @@ namespace ControllerSupport {
 		public LobbyMenuWrapper () {
 			lobbyMenu = App.LobbyMenu;
 			fadeOutSceneMethodInfo = lobbyMenu.GetType ().GetMethod ("fadeOutScene", BindingFlags.NonPublic | BindingFlags.Instance);
+		}
+
+		public void PopupCancel(String type) {
+		}
+
+		public void PopupOk(String type) {
+			if (type == "exit") {
+				// Check if we are queued, if so leave the queue.
+				if (App.Communicator.IsQueued) {
+					App.Communicator.sendRequest (new ExitMultiPlayerQueueMessage ());
+				}
+				// Exit the application.
+				Application.Quit ();
+			}
+		}
+
+		public void PopupOk(String type, String choice) {
 		}
 
 		public void HandleInput(string inputType) {
@@ -24,8 +41,19 @@ namespace ControllerSupport {
 				OpenScene (GetPreviousScene (GetCurrentSceneName()));
 				break;
 			case "Accept":
+				if (App.Popups.IsShowingPopup ()) {
+					string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (App.Popups);
+					App.Popups.RequestPopupClose ();
+					PopupOk (popupType);
+				}
 				break;
 			case "Cancel":
+				// Close any active popups if present, else show a popup for quitting the game.
+				if (App.Popups.IsShowingPopup ()) {
+					App.Popups.RequestPopupClose ();
+				} else {
+					App.Popups.ShowOkCancel (this, "exit", "Quitting Scrolls", "Are you sure you want to quit Scrolls?", "Quit", "Cancel");
+				}
 				break;
 			case "Right":
 				break;
