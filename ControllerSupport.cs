@@ -15,7 +15,8 @@ namespace ControllerSupport
 		private LoginWrapper login = null;
 		private ControllerKeyBindings controllerBindings;
 		private const float axisDelay = .2f;
-		private float axisDeltaTime = 1000.0f;
+		private float battleModeAxisDeltaTime = 1000.0f;
+		private float lobbyMenuAxisDeltaTime = 1000.0f;
 
 		//initialize everything here, Game is loaded at this point
 		public ControllerSupport () {
@@ -37,6 +38,7 @@ namespace ControllerSupport
 					scrollsTypes["BattleMode"].Methods.GetMethod("handleInput")[0],
 					scrollsTypes["EndGameScreen"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("Update")[0],
+					scrollsTypes["LobbyMenu"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["Login"].Methods.GetMethod("OnGUI")[0],
 				};
 			}
@@ -75,6 +77,9 @@ namespace ControllerSupport
 			return false;
 		}
 		public override void AfterInvoke(InvocationInfo info, ref object returnValue) {
+			if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("OnGUI")) {
+				lobbyMenu.OnGUI ();
+			}
 			return;
 		}
 
@@ -83,8 +88,9 @@ namespace ControllerSupport
 			if (endGameScreen.isActive ()) {
 				return;
 			}
+
 			// Update the Axis delta time. (Used to control how often axis input is registered)
-			axisDeltaTime += Time.deltaTime;
+			battleModeAxisDeltaTime += Time.deltaTime;
 
 			// Check if the Modifier Key is down
 			if (Input.GetKey (controllerBindings.LB)) {
@@ -144,23 +150,23 @@ namespace ControllerSupport
 					HandleBattleModeInput ("Cancel");
 				}
 				// Right
-				if (axisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {
-					axisDeltaTime = .0f;
+				if (battleModeAxisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {
+					battleModeAxisDeltaTime = .0f;
 					HandleBattleModeInput ("Right");
 				}
 				// Left
-				if (axisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) < -0.5f) {
-					axisDeltaTime = .0f;
+				if (battleModeAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) < -0.5f) {
+					battleModeAxisDeltaTime = .0f;
 					HandleBattleModeInput ("Left");
 				}
 				// Up
-				if (axisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) > .5f) {
-					axisDeltaTime = .0f;
+				if (battleModeAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) > .5f) {
+					battleModeAxisDeltaTime = .0f;
 					HandleBattleModeInput ("Up");
 				}
 				// Down
-				if (axisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) < -0.5f) {
-					axisDeltaTime = .0f;
+				if (battleModeAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) < -0.5f) {
+					battleModeAxisDeltaTime = .0f;
 					HandleBattleModeInput ("Down");
 				}
 
@@ -206,6 +212,10 @@ namespace ControllerSupport
 		}
 
 		private void HandleLobbyMenuControls () {
+			// Update the Axis delta time. (Used to control how often axis input is registered)
+			lobbyMenuAxisDeltaTime += Time.deltaTime;
+
+			// Button Input
 			if (Input.GetKeyUp(controllerBindings.RB)) {
 				lobbyMenu.HandleInput ("NextScene");
 			}
@@ -218,19 +228,40 @@ namespace ControllerSupport
 			if (Input.GetKeyUp (controllerBindings.B)) {
 				lobbyMenu.HandleInput ("Cancel");
 			}
-			/*
-			if (Input.GetKeyDown (controllerBindings.DPAD_RIGHT)) {
+
+			// Left Stick Directional Input
+			if (lobbyMenuAxisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {
+				lobbyMenuAxisDeltaTime = .0f;
 				lobbyMenu.HandleInput ("Right");
 			}
-			if (Input.GetKeyDown (controllerBindings.DPAD_LEFT)) {
+			if (lobbyMenuAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) < -0.5f) {
+				lobbyMenuAxisDeltaTime = .0f;
 				lobbyMenu.HandleInput ("Left");
 			}
-			if (Input.GetKeyDown (controllerBindings.DPAD_UP)) {
+			if (lobbyMenuAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) > .5f) {
+				lobbyMenuAxisDeltaTime = .0f;
 				lobbyMenu.HandleInput ("Up");
 			}
-			if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
+			if (lobbyMenuAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) < -0.5f) {
+				lobbyMenuAxisDeltaTime = .0f;
 				lobbyMenu.HandleInput ("Down");
-			}*/
+			}
+
+			// OSX Specific Controller DPAD Controls (as they are buttons in OSX and an axis in Windows).
+			if (OsSpec.getOS () == OSType.OSX) {
+				if (Input.GetKeyDown (controllerBindings.DPAD_RIGHT)) {
+					lobbyMenu.HandleInput ("Right");
+				}
+				if (Input.GetKeyDown (controllerBindings.DPAD_LEFT)) {
+					lobbyMenu.HandleInput ("Left");
+				}
+				if (Input.GetKeyDown (controllerBindings.DPAD_UP)) {
+					lobbyMenu.HandleInput ("Up");
+				}
+				if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
+					lobbyMenu.HandleInput ("Down");
+				}
+			}
 		}
 
 		private void HandleLoginControls () {

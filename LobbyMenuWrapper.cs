@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -8,15 +9,96 @@ namespace ControllerSupport {
 		private MethodInfo fadeOutSceneMethodInfo;
 		private string[] menuSceneNames = new string[] {"_HomeScreen", "_Lobby", "_DeckBuilderView", "_Store", "_Settings", "_Profile"};
 		private string lastScene = "_HomeScreen";
+		private List<GUISkin> GUISkins;
+		private Vector3 oldMousePosition;
+		private bool shouldDrawSeletionIndicator = false;
+		private int selectedIndex = -1;
+		private enum Movement {Up, Down, Left, Right};
 
 		public LobbyMenuWrapper () {
 			lobbyMenu = App.LobbyMenu;
+			oldMousePosition = Input.mousePosition;
 			fadeOutSceneMethodInfo = lobbyMenu.GetType ().GetMethod ("fadeOutScene", BindingFlags.NonPublic | BindingFlags.Instance);
+			CreateGUISkins ();
 		}
 
-		public void PopupCancel(String type) {
+		private void CreateGUISkins() {
+			this.GUISkins = new List<GUISkin> ();
+			GUISkin gUISkin = ScriptableObject.CreateInstance<GUISkin> ();
+			gUISkin.box.normal.background = ResourceManager.LoadTexture ("Arena/menu_sptut_mo");
+			this.GUISkins.Add (gUISkin);
+			GUISkin gUISkin2 = ScriptableObject.CreateInstance<GUISkin> ();
+			gUISkin2.box.normal.background = ResourceManager.LoadTexture ("Arena/menu_spquick_mo");
+			this.GUISkins.Add (gUISkin2);
+			GUISkin gUISkin3 = ScriptableObject.CreateInstance<GUISkin> ();
+			gUISkin3.box.normal.background = ResourceManager.LoadTexture ("Arena/menu_trials_mo");
+			this.GUISkins.Add (gUISkin3);
+			GUISkin gUISkin4 = ScriptableObject.CreateInstance<GUISkin> ();
+			gUISkin4.box.normal.background = ResourceManager.LoadTexture ("Arena/menu_mpquick_mo");
+			this.GUISkins.Add (gUISkin4);
+			GUISkin gUISkin5 = ScriptableObject.CreateInstance<GUISkin> ();
+			gUISkin5.box.normal.background = ResourceManager.LoadTexture ("Arena/menu_mpranked_mo");
+			this.GUISkins.Add (gUISkin5);
 		}
 
+		public void OnGUI () {
+			if (GetCurrentSceneIndex (GetCurrentSceneName()) == 1) {
+				// Hide the selection indicator when the mouse moved.
+				if (oldMousePosition != Input.mousePosition) {
+					oldMousePosition = Input.mousePosition;
+					shouldDrawSeletionIndicator = false;
+				}
+
+				// Draw the 'hovered' button image on the currently controller selected item.
+				if (shouldDrawSeletionIndicator && selectedIndex > -1) {
+					GUIStyle style = this.GUISkins[selectedIndex].box;
+
+					MockupCalc mockupCalc = new MockupCalc (2048, 1536);
+					float x = mockupCalc.X (1000f);
+					float x2 = mockupCalc.X (1048f);
+					float y2 = mockupCalc.Y (348f);
+					float y3 = mockupCalc.Y (548f);
+					float y4 = mockupCalc.Y (748f);
+
+					switch (selectedIndex) {
+					case 0:
+						GUI.Box(getRectFor(0, x, y2, TextAlignment.Right),"",style);
+						break;
+					case 1:
+						GUI.Box(getRectFor(1, x, y3, TextAlignment.Right),"",style);
+						break;
+					case 2:
+						GUI.Box(getRectFor(2, x, y4, TextAlignment.Right),"",style);
+						break;
+					case 3:
+						GUI.Box(getRectFor(3, x2, y2, TextAlignment.Left),"",style);
+						break;
+					case 4:
+						GUI.Box(getRectFor(4, x2, y3, TextAlignment.Left),"",style);
+						break;
+					default:
+						break;
+					}
+				}
+			}
+		}
+
+		private Rect getRectFor (int index, float x, float y, TextAlignment align) {
+			Texture2D background = this.GUISkins[0].box.normal.background;
+			MockupCalc mockupCalc = new MockupCalc (2048, 1536);
+			float width = (float)background.width;
+			float height = (float)background.height;
+			Rect result = mockupCalc.prAspectH (new Vector2 (x, y), width, height);
+			if (align == TextAlignment.Center) {
+				result.x -= result.width / 2f;
+			}
+			if (align == TextAlignment.Right) {
+				result.x -= result.width;
+			}
+			return result;
+		}
+
+		public void PopupCancel(String type) { }
 		public void PopupOk(String type) {
 			if (type == "exit") {
 				// Check if we are queued, if so leave the queue.
@@ -27,12 +109,30 @@ namespace ControllerSupport {
 				Application.Quit ();
 			}
 		}
-
-		public void PopupOk(String type, String choice) {
-		}
+		public void PopupOk(String type, String choice) {}
 
 		public void HandleInput(string inputType) {
-			//int currentSceneIndex = GetCurrentSceneIndex (GetCurrentSceneName());
+			int currentSceneIndex = GetCurrentSceneIndex (GetCurrentSceneName());
+
+			// Arena/'Lobby' Scene specific Input Handling.
+			if (currentSceneIndex == 1) {
+				switch (inputType) {
+				case "Right":
+					MoveSelectionIndicator (Movement.Right);
+					break;
+				case "Left":
+					MoveSelectionIndicator (Movement.Left);
+					break;
+				case "Up":
+					MoveSelectionIndicator (Movement.Up);
+					break;
+				case "Down":
+					MoveSelectionIndicator (Movement.Down);
+					break;
+				}
+			}
+
+			// Generic Input Handling.
 			switch (inputType) {
 			case "NextScene":
 				OpenScene (GetNextScene (GetCurrentSceneName()));
@@ -45,6 +145,8 @@ namespace ControllerSupport {
 					string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (App.Popups);
 					App.Popups.RequestPopupClose ();
 					PopupOk (popupType);
+				} else if (currentSceneIndex == 1 && selectedIndex > -1) {
+					ActivateSelectedAction ();
 				}
 				break;
 			case "Cancel":
@@ -52,17 +154,65 @@ namespace ControllerSupport {
 				if (App.Popups.IsShowingPopup ()) {
 					App.Popups.RequestPopupClose ();
 				} else {
-					App.Popups.ShowOkCancel (this, "exit", "Quitting Scrolls", "Are you sure you want to quit Scrolls?", "Quit", "Cancel");
+					App.Popups.ShowOkCancel (this, "exit", "Quitting Scrolls", "Are you sure you want to quit Scrolls?", "A: Quit", "B: Cancel");
 				}
 				break;
-			case "Right":
+			}
+		}
+
+		private void MoveSelectionIndicator(Movement movement) {
+			// Prevent moving the selection indicator when some popup is open.
+			if (App.Popups.IsShowingPopup ()) {
+				return;
+			}
+			shouldDrawSeletionIndicator = true;
+			// If selectedIndex was invalid, set it to 0.
+			if (selectedIndex < 0 || selectedIndex > 5) {
+				selectedIndex = 0;
+				return;
+			} else {
+				if (movement == Movement.Up) {
+					if (selectedIndex != 0 && selectedIndex != 3) {
+						selectedIndex--;
+					}
+				} else if (movement == Movement.Down) {
+					if (selectedIndex != 2 && selectedIndex != 4) {
+						selectedIndex++;
+					}
+				} else if (movement == Movement.Left) {
+					if (selectedIndex > 2) {
+						selectedIndex -= 3;
+					}
+				} else if (movement == Movement.Right) {
+					if (selectedIndex < 2) {
+						selectedIndex += 3;
+					}
+				}
+			}
+		}
+
+		private void ActivateSelectedAction () {
+			switch (selectedIndex) {
+			case 0:
+				App.GameActionManager.StartGame (GameActionManager.StartType.START_TUTORIAL);
 				break;
-			case "Left":
+			case 1:
+				App.GameActionManager.StartGame (GameActionManager.StartType.START_SINGLEPLAYER_QUICK);
 				break;
-			case "Up":
+			case 2:
+				App.Communicator.sendRequest (new GetTowerInfoMessage ());
+				App.GameActionManager.StartGame (GameActionManager.StartType.START_TOWER_CHALLENGE);
 				break;
-			case "Down":
+			case 3:
+				App.GameActionManager.StartGame (GameActionManager.StartType.START_MULTIPLAYER_QUICK);
+				App.LobbyMenu.runQueueAnim ();
 				break;
+			case 4:
+				App.GameActionManager.StartGame (GameActionManager.StartType.START_MULTIPLAYER_RANKED);
+				App.LobbyMenu.runQueueAnim ();
+				break;
+			default:
+				return;
 			}
 		}
 
