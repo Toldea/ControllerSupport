@@ -12,8 +12,24 @@ namespace ControllerSupport {
 
 		public HandManagerWrapper (HandManager handManager){
 			Console.WriteLine ("ControllerSupport: Creating HandManager Wrapper.");
+			Initialize (handManager);
+		}
+
+		public void Validate (HandManager handManager) {
+			if (this.handManager == null) {
+				Console.WriteLine ("ControllerSupport: HandManagerWrapper.Validate: HandManager is invalid, reinitializing..");
+				if (handManager == null) {
+					Console.WriteLine ("ControllerSupport: HandManagerWrapper.Validate: parsed HandManager is invalid..");
+				}
+				Initialize (handManager);
+			}
+		}
+
+		private void Initialize(HandManager handManager) {
 			this.handManager = handManager;
 			getCardViewByIdMethodInfo = handManager.GetType().GetMethod("GetCardViewById", BindingFlags.NonPublic | BindingFlags.Instance);
+			activeCardID = -1L;
+			nextCardReserved = false;
 		}
 
 		public void SelectNextCard(int displacement) {

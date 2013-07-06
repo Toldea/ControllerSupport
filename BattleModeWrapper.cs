@@ -18,6 +18,20 @@ namespace ControllerSupport {
 
 		public BattleModeWrapper (BattleMode battleMode) {
 			Console.WriteLine ("ControllerSupport: Creating BattleMode Wrapper.");
+			Initialize (battleMode);
+		}
+
+		public void Validate(BattleMode battleMode) {
+			if (this.battleMode == null || this.handManager == null) {
+				Console.WriteLine ("ControllerSupport: BattleModeWrapper.Validate: BattleMode or HandManager are invalid, reinitializing..");
+				if (battleMode == null) {
+					Console.WriteLine ("ControllerSupport: BattleModeWrapper.Validate: parsed BattleMode is invalid..");
+				}
+				Initialize (battleMode);
+			}
+		}
+
+		private void Initialize(BattleMode battleMode) {
 			this.battleMode = battleMode;
 			this.handManager = GetHandManager ();
 			cardClickedMethodInfo = battleMode.GetType().GetMethod("cardClicked", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -27,9 +41,7 @@ namespace ControllerSupport {
 		}
 
 		public void CardClicked(CardView cardView, int mouseButton) {
-			if (cardClickedMethodInfo != null) {
-				cardClickedMethodInfo.Invoke (battleMode, new object[] { cardView, mouseButton });
-			}
+			cardClickedMethodInfo.Invoke (battleMode, new object[] { cardView, mouseButton });
 		}
 
 		public void EndTurnPressed() {

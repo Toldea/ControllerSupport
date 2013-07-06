@@ -52,6 +52,8 @@ namespace ControllerSupport
 					battleMode = new BattleModeWrapper ((BattleMode)info.target);
 					handManager = new HandManagerWrapper (battleMode.GetHandManager());
 				}
+				battleMode.Validate ((BattleMode)info.target);
+				handManager.Validate (battleMode.GetHandManager());
 				HandleBattleModeControls ();
 			} else if (info.target.GetType () == typeof(EndGameScreen) && info.targetMethod.Equals ("OnGUI")) {
 				if (endGameScreen == null) {
