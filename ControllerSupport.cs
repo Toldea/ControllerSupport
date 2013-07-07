@@ -206,7 +206,6 @@ namespace ControllerSupport
 			if (endGameScreen.isActive ()) {
 				if (Input.GetKeyDown (controllerBindings.A)) {
 					endGameScreen.ExitScreen ();
-					Console.WriteLine ("ControllerSupport: Exiting EndGameScreen!");
 				}
 			}
 		}
@@ -303,7 +302,6 @@ namespace ControllerSupport
 					}
 				} else if (controlBoard) {
 					battleMode.TileClicked ();
-					//battleMode.TakeControlOfHand (); <- this can only happen when we actually play something, else you cant move units
 				}
 				break;
 			case "Cancel":

@@ -68,6 +68,15 @@ namespace ControllerSupport {
 		}
 		public void TakeControlOfBoard() {
 			controlBoard = true;
+			// Check if the currently selected card (if we have one) is a creature or a structure.
+			// If so, limit the current/last board position to just the left side of the board.
+			CardView card = handManager.GetSelectedCard ();
+			if (card != null) {
+				CardType.Kind type = card.getCardInfo ().getPieceKind ();
+				if (type == CardType.Kind.CREATURE || type == CardType.Kind.STRUCTURE) {
+					ConstrainBoardPosition(false);
+				}
+			}
 			TileOver ();
 			handManager.SetCardsGrayedOut (true);
 		}
@@ -86,7 +95,7 @@ namespace ControllerSupport {
 			CardView card = handManager.GetSelectedCard ();
 			if (card != null) {
 				// Get the selected card type.
-				CardType.Kind type = handManager.GetSelectedCard ().getCardInfo ().getPieceKind ();
+				CardType.Kind type = card.getCardInfo ().getPieceKind ();
 				if (type == CardType.Kind.CREATURE || type == CardType.Kind.STRUCTURE) {
 					allowRightBoardMovement = false;
 				}
@@ -96,8 +105,14 @@ namespace ControllerSupport {
 			// Add the displacement.
 			tileColumn += x;
 			tileRow += y;
+			// Constrain the position within the board boundries and limit to just the left side if needed.
+			ConstrainBoardPosition (allowRightBoardMovement);
+			TileOver (); // Fade in the new tile.
+		}
+
+		public void ConstrainBoardPosition(bool allowRightBoardPosition) {
 			// Make sure the row/column stays within the board.
-			if (allowRightBoardMovement) {
+			if (allowRightBoardPosition) {
 				if (tileColumn < -3) tileColumn = -3;
 			} else {
 				if (tileColumn < 0) tileColumn = 0;
@@ -105,10 +120,6 @@ namespace ControllerSupport {
 			if (tileColumn > 2) tileColumn = 2;
 			if (tileRow < 0) tileRow = 0;
 			if (tileRow > 4) tileRow = 4;
-
-			Console.WriteLine ("ControllerSupport: Moved to tile: [" + tileColumn + ", " + tileRow + "]");
-
-			TileOver (); // Fade in the new tile.
 		}
 
 		public void TileClicked () {
@@ -189,14 +200,15 @@ namespace ControllerSupport {
 
 		private void TileOver() {
 			Tile t = GetTile ();
+
 			if (t != null) {
-				battleMode.tileOver (t.gameObject, tileRow, tileColumn);
+				battleMode.tileOver (t.gameObject, tileRow, ConvertColumn());
 			}
 		}
 		private void TileOut() {
 			Tile t = GetTile ();
 			if (t != null) {
-				battleMode.tileOut (t.gameObject, tileRow, tileColumn);
+				battleMode.tileOut (t.gameObject, tileRow, ConvertColumn());
 			}
 		}
 
@@ -210,12 +222,19 @@ namespace ControllerSupport {
 			TileColor leftColor = (battleMode.isLeftColor(TileColor.black)) ? TileColor.black : TileColor.white;
 			TileColor rightColor = (leftColor == TileColor.black) ? TileColor.white : TileColor.black;
 			TileColor color = (tileColumn > -1) ? leftColor : rightColor;
+			return battleMode.getTile (color, tileRow, ConvertColumn());
+		}
+		private int ConvertColumn() {
+			// Get the colors for the left and right side.
+			TileColor leftColor = (battleMode.isLeftColor(TileColor.black)) ? TileColor.black : TileColor.white;
+			TileColor rightColor = (leftColor == TileColor.black) ? TileColor.white : TileColor.black;
+			TileColor color = (tileColumn > -1) ? leftColor : rightColor;
 			// Convert the tile column to the right format (2 1 0 - 0 1 2).
 			int convertedColumn = tileColumn;
 			if (color == rightColor) {
 				convertedColumn = Math.Abs (tileColumn + 1);
 			}
-			return battleMode.getTile (color, tileRow, convertedColumn);
+			return convertedColumn;
 		}
 	}
 }
