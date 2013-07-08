@@ -13,10 +13,12 @@ namespace ControllerSupport
 		private EndGameScreenWrapper endGameScreen = null;
 		private LobbyMenuWrapper lobbyMenu = null;
 		private LoginWrapper login = null;
+		private PopupsWrapper popups = null;
 		private ControllerKeyBindings controllerBindings;
 		private const float axisDelay = .2f;
 		private float battleModeAxisDeltaTime = 1000.0f;
 		private float lobbyMenuAxisDeltaTime = 1000.0f;
+		private float popupsAxisDeltaTime = 1000.0f;
 
 		//initialize everything here, Game is loaded at this point
 		public ControllerSupport () {
@@ -40,6 +42,7 @@ namespace ControllerSupport
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("Update")[0],
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["Login"].Methods.GetMethod("OnGUI")[0],
+					scrollsTypes["Popups"].Methods.GetMethod("OnGUI")[0],
 				};
 			}
 			catch {
@@ -67,6 +70,11 @@ namespace ControllerSupport
 					lobbyMenu = new LobbyMenuWrapper ();
 				}
 				HandleLobbyMenuControls ();
+				// Let popups leech of LobbyMenu's update function.
+				if (popups == null) {
+					popups = new PopupsWrapper (App.Popups);
+				}
+				HandlePopupsControls ();
 			} else if (info.target.GetType () == typeof(Login) && info.targetMethod.Equals ("OnGUI")) {
 				if (login == null) {
 					login = new LoginWrapper ((Login)info.target);
@@ -79,6 +87,11 @@ namespace ControllerSupport
 		public override void AfterInvoke(InvocationInfo info, ref object returnValue) {
 			if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("OnGUI")) {
 				lobbyMenu.OnGUI ();
+			} else if (info.target.GetType () == typeof(Popups) && info.targetMethod.Equals ("OnGUI")) {
+				if (popups == null) {
+					popups = new PopupsWrapper (App.Popups);
+				}
+				popups.OnGUI ();
 			}
 			return;
 		}
@@ -224,8 +237,8 @@ namespace ControllerSupport
 			if (Input.GetKeyUp (controllerBindings.A)) {
 				lobbyMenu.HandleInput ("Accept");
 			}
-			if (Input.GetKeyUp (controllerBindings.B)) {
-				lobbyMenu.HandleInput ("Cancel");
+			if (Input.GetKeyUp (controllerBindings.START)) {
+				lobbyMenu.HandleInput ("Start");
 			}
 
 			// Left Stick Directional Input
@@ -266,6 +279,55 @@ namespace ControllerSupport
 		private void HandleLoginControls () {
 			if (Input.GetKeyUp (controllerBindings.A) || Input.GetKeyUp (controllerBindings.START)) {
 				login.Login ();
+			}
+		}
+
+		private void HandlePopupsControls () {
+			if (popups.IsShowingPopup ()) {
+				// Update the Axis delta time. (Used to control how often axis input is registered)
+				popupsAxisDeltaTime += Time.deltaTime;
+
+				// Button Input
+				if (Input.GetKeyUp (controllerBindings.A)) {
+					popups.HandleInput ("Accept");
+				}
+				if (Input.GetKeyUp (controllerBindings.B)) {
+					popups.HandleInput ("Cancel");
+				}
+
+				// Left Stick Directional Input
+				if (popupsAxisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {
+					popupsAxisDeltaTime = .0f;
+					popups.HandleInput ("Right");
+				}
+				if (popupsAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) < -0.5f) {
+					popupsAxisDeltaTime = .0f;
+					popups.HandleInput ("Left");
+				}
+				if (popupsAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) > .5f) {
+					popupsAxisDeltaTime = .0f;
+					popups.HandleInput ("Up");
+				}
+				if (popupsAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) < -0.5f) {
+					popupsAxisDeltaTime = .0f;
+					popups.HandleInput ("Down");
+				}
+
+				// OSX Specific Controller DPAD Controls (as they are buttons in OSX and an axis in Windows).
+				if (OsSpec.getOS () == OSType.OSX) {
+					if (Input.GetKeyDown (controllerBindings.DPAD_RIGHT)) {
+						popups.HandleInput ("Right");
+					}
+					if (Input.GetKeyDown (controllerBindings.DPAD_LEFT)) {
+						popups.HandleInput ("Left");
+					}
+					if (Input.GetKeyDown (controllerBindings.DPAD_UP)) {
+						popups.HandleInput ("Up");
+					}
+					if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
+						popups.HandleInput ("Down");
+					}
+				}
 			}
 		}
 

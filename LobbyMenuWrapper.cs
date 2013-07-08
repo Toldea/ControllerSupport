@@ -98,17 +98,8 @@ namespace ControllerSupport {
 			return result;
 		}
 
-		public void PopupCancel(String type) { }
-		public void PopupOk(String type) {
-			if (type == "exit") {
-				// Check if we are queued, if so leave the queue.
-				if (App.Communicator.IsQueued) {
-					App.Communicator.sendRequest (new ExitMultiPlayerQueueMessage ());
-				}
-				// Exit the application.
-				Application.Quit ();
-			}
-		}
+		public void PopupCancel(String type) {}
+		public void PopupOk(String type) {}
 		public void PopupOk(String type, String choice) {}
 
 		public void HandleInput(string inputType) {
@@ -141,20 +132,15 @@ namespace ControllerSupport {
 				OpenScene (GetPreviousScene (GetCurrentSceneName()));
 				break;
 			case "Accept":
-				if (App.Popups.IsShowingPopup ()) {
-					string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (App.Popups);
-					App.Popups.RequestPopupClose ();
-					PopupOk (popupType);
-				} else if (currentSceneIndex == 1 && selectedIndex > -1) {
+				if (!App.Popups.IsShowingPopup () && currentSceneIndex == 1 && selectedIndex > -1) {
 					ActivateSelectedAction ();
 				}
 				break;
-			case "Cancel":
+			case "Start":
 				// Close any active popups if present, else show a popup for quitting the game.
-				if (App.Popups.IsShowingPopup ()) {
-					App.Popups.RequestPopupClose ();
+				if (!App.Popups.IsShowingPopup ()) {
+					App.Popups.ShowOkCancel (lobbyMenu, "exit", "Quitting Scrolls", "Are you sure you want to quit Scrolls?", "Quit", "Cancel");
 				} else {
-					App.Popups.ShowOkCancel (this, "exit", "Quitting Scrolls", "Are you sure you want to quit Scrolls?", "A: Quit", "B: Cancel");
 				}
 				break;
 			}
