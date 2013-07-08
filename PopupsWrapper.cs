@@ -32,7 +32,7 @@ namespace ControllerSupport {
 		}
 
 		public void OnGUI() {
-			herpderp ();
+			DrawPopupHoverIndicator ();
 
 			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (this.popups);
 
@@ -46,7 +46,102 @@ namespace ControllerSupport {
 			}
 		}
 
-		private void herpderp() {
+		private void DrawDeckSelectorHoverIndicator(Rect popupInner) {
+			List<DeckInfo> deckList = (List<DeckInfo>)typeof(Popups).GetField ("deckList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+			if (selectedIndex < 0 || selectedIndex >= deckList.Count) {
+				return;
+			}
+			deckList.Sort (delegate (DeckInfo a, DeckInfo b) {
+				if (a.valid && !b.valid) {
+					return -1;
+				}
+				if (b.valid && !a.valid) {
+					return 1;
+				}
+				if (a.timestamp > b.timestamp) {
+					return -1;
+				}
+				if (b.timestamp > a.timestamp) {
+					return 1;
+				}
+				return a.name.CompareTo (b.name);
+			});
+			Rect position = new Rect (popupInner.x, popupInner.y + popupInner.height * 0.15f, popupInner.width, popupInner.height * 0.85f);
+			float num = (float)Screen.height * 0.015f;
+			float num2 = (float)Screen.height * 0.07f;
+			float num3 = num2 + num;
+			Rect position2 = new Rect (position.x + 2f + num, position.y + 2f + num, position.width - 4f - 2f * num, position.height - 4f - 2f * num);
+			float num4 = position2.width - 20f;
+			int num5 = (deckList.Count % 2 != 0) ? (deckList.Count / 2 + 1) : (deckList.Count / 2);
+			int fontSize = GUI.skin.label.fontSize;
+			TextAnchor alignment = GUI.skin.label.alignment;
+			bool wordWrap = GUI.skin.label.wordWrap;
+			GUI.skin.label.wordWrap = false;
+			GUI.skin.label.alignment = TextAnchor.UpperLeft;
+			Vector2 deckScroll = (Vector2)typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+			deckScroll = GUI.BeginScrollView (position2, deckScroll, new Rect (0f, 0f, num4, (float)(num5 - 1) * num3 + num2));
+			typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (this.popups, deckScroll);
+			//for (int i = 0; i < num5; i++) {
+				//for (int j = 0; j < 2; j++) {
+					//if (2 * i + j < deckList.Count) {
+			int i = selectedIndex / 2;
+			int j = selectedIndex % 2;
+			if (2 * i + j < deckList.Count) {
+				DeckInfo deckInfo = deckList[(2 * i + j)];
+				bool flag = deckInfo.valid;// || this.allowInvalidClicks;
+				GUI.enabled = flag;
+				Rect r = new Rect ((float)j * num4 / 2f, (float)i * num3, num4 / 2f - num, num2);
+				//Rect rect = new Rect (r.xMax - (float)Screen.height * 0.025f, r.y + (float)Screen.height * 0.005f, (float)Screen.height * 0.02f, (float)Screen.height * 0.02f);
+				/*
+				if (this.showDeleteDeckIcon) {
+					GUI.skin = this.emptySkin;
+					if (this.GUIButton (rect, string.Empty)) {
+						this.deckChosenCallback.PopupDeckDeleted (deckInfo);
+					}
+					GUI.skin = this.regularUISkin;
+				}*/
+
+				GUI.Box (r, string.Empty);
+				string text = deckInfo.name;
+				if (!deckInfo.valid) {
+					text = "<color=#ee5533>[Illegal]</color> " + text;
+				}
+				GUI.skin.label.fontSize = 10 + Screen.height / 60;
+				GUI.Label (new Rect (r.x + r.width * 0.25f, r.y + r.height * 0.05f, r.width * 0.66f, r.height * 0.6f), text);
+				GUI.skin.label.fontSize = 8 + Screen.height / 80;
+				GUI.Label (new Rect (r.x + r.width * 0.25f, r.y + r.height * 0.45f, r.width * 0.66f, r.height * 0.6f), deckInfo.updated);
+				if (!flag) {
+					GUI.color = new Color (1f, 1f, 1f, 0.5f);
+				}
+				GUI.DrawTexture (new Rect (r.x + r.height * 0.4f, r.y + r.height * 0.1f, r.height * 0.7f, r.height * 0.8f), ResourceManager.LoadTexture ("Arena/deck_icon"));
+				if (deckInfo.resources != string.Empty) {
+					string[] array = deckInfo.resources.Split (new char[] {
+						','
+					});
+					for (int k = 0; k < array.Length; k++) {
+						float num6 = r.height * 0.38f;
+						float left = r.x + ((k < 2) ? 0f : (num6 * 0.85f * 73f / 72f)) + 3f;
+						float num7 = r.y + ((k < 2) ? 0f : (num6 / 3f)) + 3f;
+						GUI.DrawTexture (new Rect (left, num7 + num6 * 0.85f * (float)(k % 2), num6 * 73f / 72f, num6), ResourceManager.LoadTexture ("BattleUI/battlegui_icon_" + array [k]));
+					}
+				}
+				/*
+				GUI.color = Color.white;
+				if (this.showDeleteDeckIcon) {
+					GUI.skin = this.closeButtonSkin;
+					if (GUI.Button (rect, string.Empty)) {
+					}
+					GUI.skin = this.regularUISkin;
+				}*/
+				GUI.enabled = true;
+			}
+			GUI.skin.label.fontSize = fontSize;
+			GUI.skin.label.alignment = alignment;
+			GUI.skin.label.wordWrap = wordWrap;
+			GUI.EndScrollView ();
+		}
+
+		private void DrawPopupHoverIndicator() {
 			// Hide the selection indicator when the mouse moved.
 			if (oldMousePosition != Input.mousePosition) {
 				oldMousePosition = Input.mousePosition;
@@ -100,7 +195,6 @@ namespace ControllerSupport {
 						} else {
 							if (currentPopupType == PopupType.MULTIBUTTON) {
 								string[] buttonList = (string[])typeof(Popups).GetField ("buttonList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-								Console.WriteLine ("ControllerSupport: PopupsWrapper: herpderp: ButtonList.Length: " + buttonList.Length + ", selectedIndex: " + selectedIndex);
 								float num5 = (float)Screen.height * 0.05f;
 								float num6 = num5 + (float)Screen.height * 0.02f;
 								Rect r4 = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.1f, rect2.y + rect2.height * 0.55f - ((float)buttonList.Length / 2f - (float)selectedIndex) * num6 + (num6 - num5), (float)Screen.height * 0.2f, num5);
@@ -117,6 +211,9 @@ namespace ControllerSupport {
 						}
 						GUI.skin = this.regularUISkin;
 						*/
+					}
+					if (currentPopupType == PopupType.DECK_SELECTOR) {
+						DrawDeckSelectorHoverIndicator (rect2);
 					}
 					/*
 					if (currentPopupType == PopupType.JOIN_ROOM) {
@@ -156,6 +253,8 @@ namespace ControllerSupport {
 					}
 				} else if (currentPopupType == PopupType.MULTIBUTTON) {
 					AcceptMultibuttonPopup ();
+				} else if (currentPopupType == PopupType.DECK_SELECTOR) {
+					AcceptDeckSelectorPopup ();
 				}
 				selectedIndex = -1;
 				break;
@@ -185,7 +284,6 @@ namespace ControllerSupport {
 		}
 
 		private void AcceptPopup() {
-			Console.WriteLine ("ControllerSupport: PopupsWrapper: AcceptPopup called!");
 			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
 			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
 			HidePopupMethodInfo.Invoke (popups, new object[] { });
@@ -200,15 +298,37 @@ namespace ControllerSupport {
 			if (selectedIndex >= buttonList.Length) {
 				return;
 			}
-			Console.WriteLine ("ControllerSupport: PopupsWrapper: AcceptMultibuttonPopup called!");
 			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
 			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
 			HidePopupMethodInfo.Invoke (popups, new object[] { });
 			string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
 			((IOkStringCallback)typeof(Popups).GetField ("okStringCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups)).PopupOk(popupType, buttonList[selectedIndex]);
 		}
+		private void AcceptDeckSelectorPopup () {
+			HidePopupMethodInfo.Invoke (popups, new object[] { });
+			List<DeckInfo> deckList = (List<DeckInfo>)typeof(Popups).GetField ("deckList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+			if (selectedIndex < 0 || selectedIndex >= deckList.Count) {
+				return;
+			}
+			deckList.Sort (delegate (DeckInfo a, DeckInfo b) {
+				if (a.valid && !b.valid) {
+					return -1;
+				}
+				if (b.valid && !a.valid) {
+					return 1;
+				}
+				if (a.timestamp > b.timestamp) {
+					return -1;
+				}
+				if (b.timestamp > a.timestamp) {
+					return 1;
+				}
+				return a.name.CompareTo (b.name);
+			});
+			DeckInfo deckInfo = deckList[selectedIndex];
+			((IDeckCallback)typeof(Popups).GetField ("deckChosenCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups)).PopupDeckChosen(deckInfo);
+		}
 		private void CancelPopup() {
-			Console.WriteLine ("ControllerSupport: PopupsWrapper: CancelPopup called!");
 			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
 			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
 			HidePopupMethodInfo.Invoke (popups, new object[] { });
@@ -239,6 +359,29 @@ namespace ControllerSupport {
 					selectedIndex++;
 					if (selectedIndex >= numButtons) {
 						selectedIndex = numButtons - 1;
+					}
+				}
+			} else if (currentPopupType == PopupType.DECK_SELECTOR) {
+				List<DeckInfo> deckList = (List<DeckInfo>)typeof(Popups).GetField ("deckList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				int listCount = deckList.Count;
+
+				if (movement == Movement.Up) {
+					if (selectedIndex - 2 >= 0) {
+						selectedIndex -= 2;
+					}
+				} else if (movement == Movement.Down) {
+					if (selectedIndex + 2 < listCount) {
+						selectedIndex += 2;
+					}
+				} else if (movement == Movement.Left) {
+					// We are on the right side if selected index currently is uneven.
+					if (selectedIndex % 2 == 1 && selectedIndex > 0) {
+						selectedIndex--;
+					}
+				} else if (movement == Movement.Right) {
+					// We are on the left side if selected index currently is even.
+					if (selectedIndex % 2 == 0 && selectedIndex < listCount-1) {
+						selectedIndex++;
 					}
 				}
 			}
