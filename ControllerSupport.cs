@@ -107,23 +107,28 @@ namespace ControllerSupport
 
 			// Check if the Modifier Key is down
 			if (Input.GetKey (controllerBindings.LB)) {
-				// Sacrifice for Growth
-				if (Input.GetKeyUp (controllerBindings.A)) {
-					HandleBattleModeInput ("SacGrowth");
-				}
-				// Sacrifice for Order
-				if (Input.GetKeyUp (controllerBindings.X)) {
-					HandleBattleModeInput ("SacOrder");
-				}
-				// Sacrifice for Energy
-				if (Input.GetKeyUp (controllerBindings.Y)) {
-					HandleBattleModeInput ("SacEnergy");
-				}
-				// Sacrifice for Scrolls
-				if (Input.GetKeyUp (controllerBindings.B)) {
-					HandleBattleModeInput ("Cycle");
+				// Make sure we can't 'sac' when we ended our turn.
+				if (!battleMode.TurnEnded ()) {
+					// Sacrifice for Growth
+					if (Input.GetKeyUp (controllerBindings.A)) {
+						HandleBattleModeInput ("SacGrowth");
+					}
+					// Sacrifice for Order
+					if (Input.GetKeyUp (controllerBindings.X)) {
+						HandleBattleModeInput ("SacOrder");
+					}
+					// Sacrifice for Energy
+					if (Input.GetKeyUp (controllerBindings.Y)) {
+						HandleBattleModeInput ("SacEnergy");
+					}
+					// Sacrifice for Scrolls
+					if (Input.GetKeyUp (controllerBindings.B)) {
+						HandleBattleModeInput ("Cycle");
+					}
 				}
 			} else if (Input.GetKey(controllerBindings.BACK)) {
+				// Reshow the chat.
+				battleMode.ShowChat ();
 				// Hotkeys for sending some basic chat messages.
 				if (Input.GetKeyUp (controllerBindings.A)) {
 					battleMode.SendChatMessage("Hello and good luck.");
@@ -350,13 +355,16 @@ namespace ControllerSupport
 			
 			case "Accept":
 				if (controlHand) {
-					// Check if we are already selecting the currently active card.
-					if (handManager.CompareSelectedCardToActiveCard ()) {
-						// Check if we can directly cast the selected card (aka it has a 'cast' button in game).
-						if (handManager.DoesSelectedSpellHaveCastButton ()) {
-							handManager.UseActiveCard ("play");
-						} else if (handManager.IsSelectedCardPlayableOnBoard ()) { // Check if the scroll is playable on board.
-							battleMode.TakeControlOfBoard ();
+					// Make sure it is still our turn.
+					if (!battleMode.TurnEnded()) {
+						// Check if we are already selecting the currently active card.
+						if (handManager.CompareSelectedCardToActiveCard ()) {
+							// Check if we can directly cast the selected card (aka it has a 'cast' button in game).
+							if (handManager.DoesSelectedSpellHaveCastButton ()) {
+								handManager.UseActiveCard ("play");
+							} else if (handManager.IsSelectedCardPlayableOnBoard ()) { // Check if the scroll is playable on board.
+								battleMode.TakeControlOfBoard ();
+							}
 						}
 					} else {
 						// Select the currently active card.

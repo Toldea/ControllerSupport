@@ -48,7 +48,8 @@ namespace ControllerSupport {
 
 		private void DrawDeckSelectorHoverIndicator(Rect popupInner) {
 			List<DeckInfo> deckList = (List<DeckInfo>)typeof(Popups).GetField ("deckList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-			if (selectedIndex < 0 || selectedIndex >= deckList.Count) {
+			bool showDeleteDeckIcon = (bool)typeof(Popups).GetField ("showDeleteDeckIcon", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+			if (showDeleteDeckIcon || selectedIndex < 0 || selectedIndex >= deckList.Count) {
 				return;
 			}
 			deckList.Sort (delegate (DeckInfo a, DeckInfo b) {
@@ -81,9 +82,6 @@ namespace ControllerSupport {
 			Vector2 deckScroll = (Vector2)typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
 			deckScroll = GUI.BeginScrollView (position2, deckScroll, new Rect (0f, 0f, num4, (float)(num5 - 1) * num3 + num2));
 			typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (this.popups, deckScroll);
-			//for (int i = 0; i < num5; i++) {
-				//for (int j = 0; j < 2; j++) {
-					//if (2 * i + j < deckList.Count) {
 			int i = selectedIndex / 2;
 			int j = selectedIndex % 2;
 			if (2 * i + j < deckList.Count) {
@@ -259,9 +257,7 @@ namespace ControllerSupport {
 				selectedIndex = -1;
 				break;
 			case "Cancel":
-				//if (currentPopupType == PopupType.OK_CANCEL || currentPopupType == PopupType.SAVE_DECK || currentPopupType == PopupType.PURCHASE_PASSWORD_ENTRY) {
-					CancelPopup ();
-				//}
+				CancelPopup ();
 				selectedIndex = -1;
 				break;
 			case "Right":

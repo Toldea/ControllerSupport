@@ -194,8 +194,18 @@ namespace ControllerSupport {
 			return false;
 		}
 
+		public void ShowChat() {
+			typeof(BattleMode).GetField ("fadeChat", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleMode, true);
+		}
+
 		public void SendChatMessage(string message) {
 			battleMode.GetType ().GetMethod ("sendBattleRequest", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (battleMode, new object[] {new GameChatMessageMessage (message) });
+		}
+
+		public bool TurnEnded() {
+			TileColor leftColor = (battleMode.isLeftColor(TileColor.black)) ? TileColor.black : TileColor.white;
+			TileColor activeColor = (TileColor)typeof(BattleMode).GetField ("activeColor", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+			return (activeColor != leftColor);
 		}
 
 		private void TileOver() {
