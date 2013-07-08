@@ -99,6 +99,12 @@ namespace ControllerSupport {
 				if (type == CardType.Kind.CREATURE || type == CardType.Kind.STRUCTURE) {
 					allowRightBoardMovement = false;
 				}
+			} else {
+				// Check if the currently active ability equals 'move', if so limit the board movement to just 'our' side.
+				string activeAbilityId = (string)typeof(BattleMode).GetField ("activeAbilityId", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+				if (activeAbilityId == "Move") {
+					allowRightBoardMovement = false;
+				}
 			}
 
 			TileOut (); // Fade out the last tile.
@@ -180,17 +186,11 @@ namespace ControllerSupport {
 
 		public bool UnitSelectedOnBoard() {
 			if (handManager.GetSelectedCard () == null) {
-				//List<List<Tile>> tileSelectionList = new List<List<Tile>> ((List<List<Tile>>)typeof(BattleMode).GetField ("tileSelectionList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode));
 				string activeAbilityId = (string)typeof(BattleMode).GetField ("activeAbilityId", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
 				if (activeAbilityId != string.Empty && activeAbilityId != null) {
-					//tileSelectionList.RemoveAt (0);
-					//if (tileSelectionList.Count == 0) {
-						Console.WriteLine ("ControllerSupport: UnitSelectedOnBoard() ******* THERE WAS A UNIT SELECTED ******"); // <- move
-						return true;
-					//}
+					return true;
 				}
 			}
-			Console.WriteLine ("ControllerSupport: UnitSelectedOnBoard() ******* THERE WAS NO!!! UNIT SELECTED ******"); // <- move
 			return false;
 		}
 

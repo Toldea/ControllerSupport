@@ -194,7 +194,8 @@ namespace ControllerSupport {
 		private void ActivateSelectedAction () {
 			switch (selectedIndex) {
 			case 0:
-				App.GameActionManager.StartGame (GameActionManager.StartType.START_TUTORIAL);
+				//App.GameActionManager.StartGame (GameActionManager.StartType.START_TUTORIAL);
+				App.Popups.ShowOk (this, "notutorial", "No controller support for the Tutorial", "Controller support for the tutorial is still being worked on!", "A: Ok");
 				break;
 			case 1:
 				App.GameActionManager.StartGame (GameActionManager.StartType.START_SINGLEPLAYER_QUICK);
