@@ -127,8 +127,6 @@ namespace ControllerSupport
 					}
 				}
 			} else if (Input.GetKey(controllerBindings.BACK)) {
-				// Reshow the chat.
-				battleMode.ShowChat ();
 				// Hotkeys for sending some basic chat messages.
 				if (Input.GetKeyUp (controllerBindings.A)) {
 					battleMode.SendChatMessage("Hello and good luck.");
@@ -166,6 +164,10 @@ namespace ControllerSupport
 				// Cancel
 				if (Input.GetKeyUp (controllerBindings.B)) {
 					HandleBattleModeInput ("Cancel");
+				}
+				// Reshow the chat
+				if (Input.GetKeyUp (controllerBindings.BACK)) {
+					battleMode.ShowChat ();
 				}
 				// Right
 				if (battleModeAxisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {

@@ -195,6 +195,8 @@ namespace ControllerSupport {
 		}
 
 		public void ShowChat() {
+			battleMode.GetType ().GetMethod ("setChatActive", BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, new[] {typeof(bool)}, null).Invoke (battleMode, new object[] {true});
+			typeof(BattleMode).GetField ("chatLastMessageSentAtTime", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleMode, Time.time);
 			typeof(BattleMode).GetField ("fadeChat", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleMode, true);
 		}
 
