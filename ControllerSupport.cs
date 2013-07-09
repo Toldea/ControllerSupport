@@ -427,13 +427,13 @@ namespace ControllerSupport
 				break;
 			
 			case "SacGrowth":
-				handManager.UseActiveCard ("growth");
+				handManager.UseActiveCard ("growth", battleMode.GetResourceTypes());
 				break;
 			case "SacOrder":
-				handManager.UseActiveCard ("order");
+				handManager.UseActiveCard ("order", battleMode.GetResourceTypes());
 				break;
 			case "SacEnergy":
-				handManager.UseActiveCard ("energy");
+				handManager.UseActiveCard ("energy", battleMode.GetResourceTypes());
 				break;
 			case "Cycle":
 				handManager.UseActiveCard ("cycle");

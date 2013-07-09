@@ -89,7 +89,7 @@ namespace ControllerSupport {
 			}
 		}
 
-		public void UseActiveCard(string action) {
+		public void UseActiveCard(string action, ResourceType[] resTypes = null) {
 			CardActivator cardActivator = (CardActivator)typeof(HandManager).GetField ("cardActivator", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (handManager);
 			if (cardActivator != null) {
 				// Safe the next card id while we still have our card in hand.
@@ -101,11 +101,17 @@ namespace ControllerSupport {
 					// Reserve the next card, so it gets selected the next time the user attempts to move through his scrolls.
 					nextCardReserved = true;
 				}
-				// Use the currently active card.
-				cardActivator.GetType ().GetMethod ("iconClicked", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (cardActivator, new object[] { action });
-				// If available set the next card as active.
-				if (nextCardID != -1L) {
-					activeCardID = nextCardID;
+				bool allowAction = true;
+				if (action == "growth" || action == "order" || action == "energy") {
+					allowAction = CanSacrificeForResource (action, resTypes);
+				}
+				if (allowAction) {
+					// Use the currently active card.
+					cardActivator.GetType ().GetMethod ("iconClicked", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (cardActivator, new object[] { action });
+					// If available set the next card as active.
+					if (nextCardID != -1L) {
+						activeCardID = nextCardID;
+					}
 				}
 			}
 		}
@@ -150,6 +156,29 @@ namespace ControllerSupport {
 
 		public void SetCardsGrayedOut(bool shouldGrayOut) {
 			handManager.SetCardsGrayedOut (shouldGrayOut);
+		}
+
+		private bool CanSacrificeForResource (string resource, ResourceType[] resTypes) {
+			foreach (ResourceType type in resTypes) {
+				switch (resource) {
+				case "growth":
+					if (type == ResourceType.GROWTH) {
+						return true;
+					}
+					break;
+				case "order":
+					if (type == ResourceType.ORDER) {
+						return true;
+					}
+					break;
+				case "energy":
+					if (type == ResourceType.ENERGY) {
+						return true;
+					}
+					break;
+				}
+			}
+			return false;
 		}
 
 		private CardType.Kind GetSelectedCardType() {

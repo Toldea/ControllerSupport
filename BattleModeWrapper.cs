@@ -44,6 +44,10 @@ namespace ControllerSupport {
 			cardClickedMethodInfo.Invoke (battleMode, new object[] { cardView, mouseButton });
 		}
 
+		public ResourceType[] GetResourceTypes() {
+			return (ResourceType[])typeof(BattleMode).GetField ("resTypes", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+		}
+
 		public void EndTurnPressed() {
 			battleMode.endturnPressed ();
 		}
@@ -138,10 +142,8 @@ namespace ControllerSupport {
 				// Check if we are trying to play a card from hand on the battlefield (i.e. units / targeted spells / enchantments).
 				if (handManager.GetSelectedCard () != null) {
 					if (battleMode.isTileInList (tile, tileSelectionList)) {
-						//Console.WriteLine ("ControllerSupport: TileClicked() tileSelectionList: " + tileSelectionList);
 						tileSelectionList.RemoveAt (0);
 						if (tileSelectionList.Count == 0) {
-							//Console.WriteLine ("ControllerSupport: TileClicked() tileSelectionList.Count == 0!");
 							didPlaceUnit = true;
 						}
 					}
@@ -161,7 +163,6 @@ namespace ControllerSupport {
 										if (!(activeAbility.name == "Move")) {
 											TilePosition pos = (TilePosition)typeof(CardView).GetField ("pos", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (cardView);
 											if (pos != null) {
-												//Console.WriteLine ("ControllerSupport: Activating Ability: " + activeAbility.description);
 												battleMode.ActivateTriggeredAbility (activeAbility.id, pos);
 												battleMode.HideCardView ();
 												didActivateAbility = true;
