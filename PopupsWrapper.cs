@@ -243,7 +243,9 @@ namespace ControllerSupport {
 
 			switch (inputType) {
 			case "Accept":
-				if (currentPopupType == PopupType.OK_CANCEL) {
+				if (currentPopupType == PopupType.OK) {
+					CancelPopup ();
+				} else if (currentPopupType == PopupType.OK_CANCEL) {
 					if (selectedIndex == 0) {
 						AcceptPopup ();
 					} else if (selectedIndex == 1) {

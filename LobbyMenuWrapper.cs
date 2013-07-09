@@ -191,8 +191,7 @@ namespace ControllerSupport {
 				App.GameActionManager.StartGame (GameActionManager.StartType.START_TOWER_CHALLENGE);
 				break;
 			case 3:
-				//App.GameActionManager.StartGame (GameActionManager.StartType.START_MULTIPLAYER_QUICK);
-				App.GameActionManager.StartGame (GameActionManager.StartType.START_SINGLEPLAYER_QUICK);
+				App.GameActionManager.StartGame (GameActionManager.StartType.START_MULTIPLAYER_QUICK);
 				App.LobbyMenu.runQueueAnim ();
 				break;
 			case 4:

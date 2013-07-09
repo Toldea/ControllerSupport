@@ -69,12 +69,15 @@ namespace ControllerSupport
 				if (lobbyMenu == null) {
 					lobbyMenu = new LobbyMenuWrapper ();
 				}
-				HandleLobbyMenuControls ();
-				// Let popups leech of LobbyMenu's update function.
 				if (popups == null) {
 					popups = new PopupsWrapper (App.Popups);
 				}
-				HandlePopupsControls ();
+				// Let popups leech of LobbyMenu's update function.
+				if (popups.IsShowingPopup ()) {
+					HandlePopupsControls ();
+				} else {
+					HandleLobbyMenuControls ();
+				}
 			} else if (info.target.GetType () == typeof(Login) && info.targetMethod.Equals ("OnGUI")) {
 				if (login == null) {
 					login = new LoginWrapper ((Login)info.target);
@@ -290,50 +293,48 @@ namespace ControllerSupport
 		}
 
 		private void HandlePopupsControls () {
-			if (popups.IsShowingPopup ()) {
-				// Update the Axis delta time. (Used to control how often axis input is registered)
-				popupsAxisDeltaTime += Time.deltaTime;
+			// Update the Axis delta time. (Used to control how often axis input is registered)
+			popupsAxisDeltaTime += Time.deltaTime;
 
-				// Button Input
-				if (Input.GetKeyUp (controllerBindings.A)) {
-					popups.HandleInput ("Accept");
-				}
-				if (Input.GetKeyUp (controllerBindings.B)) {
-					popups.HandleInput ("Cancel");
-				}
+			// Button Input
+			if (Input.GetKeyUp (controllerBindings.A)) {
+				popups.HandleInput ("Accept");
+			}
+			if (Input.GetKeyUp (controllerBindings.B)) {
+				popups.HandleInput ("Cancel");
+			}
 
-				// Left Stick Directional Input
-				if (popupsAxisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {
-					popupsAxisDeltaTime = .0f;
+			// Left Stick Directional Input
+			if (popupsAxisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {
+				popupsAxisDeltaTime = .0f;
+				popups.HandleInput ("Right");
+			}
+			if (popupsAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) < -0.5f) {
+				popupsAxisDeltaTime = .0f;
+				popups.HandleInput ("Left");
+			}
+			if (popupsAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) > .5f) {
+				popupsAxisDeltaTime = .0f;
+				popups.HandleInput ("Up");
+			}
+			if (popupsAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) < -0.5f) {
+				popupsAxisDeltaTime = .0f;
+				popups.HandleInput ("Down");
+			}
+
+			// OSX Specific Controller DPAD Controls (as they are buttons in OSX and an axis in Windows).
+			if (OsSpec.getOS () == OSType.OSX) {
+				if (Input.GetKeyDown (controllerBindings.DPAD_RIGHT)) {
 					popups.HandleInput ("Right");
 				}
-				if (popupsAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) < -0.5f) {
-					popupsAxisDeltaTime = .0f;
+				if (Input.GetKeyDown (controllerBindings.DPAD_LEFT)) {
 					popups.HandleInput ("Left");
 				}
-				if (popupsAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) > .5f) {
-					popupsAxisDeltaTime = .0f;
+				if (Input.GetKeyDown (controllerBindings.DPAD_UP)) {
 					popups.HandleInput ("Up");
 				}
-				if (popupsAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) < -0.5f) {
-					popupsAxisDeltaTime = .0f;
+				if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
 					popups.HandleInput ("Down");
-				}
-
-				// OSX Specific Controller DPAD Controls (as they are buttons in OSX and an axis in Windows).
-				if (OsSpec.getOS () == OSType.OSX) {
-					if (Input.GetKeyDown (controllerBindings.DPAD_RIGHT)) {
-						popups.HandleInput ("Right");
-					}
-					if (Input.GetKeyDown (controllerBindings.DPAD_LEFT)) {
-						popups.HandleInput ("Left");
-					}
-					if (Input.GetKeyDown (controllerBindings.DPAD_UP)) {
-						popups.HandleInput ("Up");
-					}
-					if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
-						popups.HandleInput ("Down");
-					}
 				}
 			}
 		}
