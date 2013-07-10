@@ -44,6 +44,7 @@ namespace ControllerSupport
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("fadeOutScene")[0],
 					scrollsTypes["Login"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["Popups"].Methods.GetMethod("OnGUI")[0],
+					scrollsTypes["Tile"].Methods.GetMethod("FixedUpdate")[0],
 				};
 			}
 			catch {
@@ -101,28 +102,21 @@ namespace ControllerSupport
 					popups = new PopupsWrapper (App.Popups);
 				}
 				popups.OnGUI ();
+			} else if (info.target.GetType () == typeof(Tile) && info.targetMethod.Equals ("FixedUpdate")) {
+				// Custom, more clearly visable tile hover color.
+				if (battleMode.InControlOfBoard() && ((Tile)info.target).Equals(battleMode.GetTile())) {
+					Tile.SelectionType markerType = (Tile.SelectionType)typeof(Tile).GetField ("markerType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (((Tile)info.target));
+					if (markerType == Tile.SelectionType.Hover) {
+						GameObject referenceTile = (GameObject)typeof(Tile).GetField ("referenceTile", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (((Tile)info.target));
+						referenceTile.renderer.material.color = new Color(.3f, 1f, .3f, .4f);
+					}
+				}
 			}
 			return;
 		}
 
 		private void HandleBattleModeControls() {
-			// Hotkeys for sending some basic chat messages.
-			if (Input.GetKey (controllerBindings.BACK)) {
-				if (Input.GetKeyUp (controllerBindings.A)) {
-					battleMode.SendChatMessage ("Hello and good luck.");
-				}
-				if (Input.GetKeyUp (controllerBindings.B)) {
-					battleMode.SendChatMessage ("Good Game.");
-				}
-				if (Input.GetKeyUp (controllerBindings.X)) {
-					battleMode.SendChatMessage ("Nice play!");
-				}
-				if (Input.GetKeyUp (controllerBindings.Y)) {
-					battleMode.SendChatMessage (":)");
-				}
-			}
-
-			// If the end screen is linked and it 'active', disable battle mode controls. (Chat shortcuts are still allowed)
+			// If the end screen is linked and it 'active', disable battle mode controls.
 			if (endGameScreen.isActive ()) {
 				return;
 			}
@@ -150,6 +144,19 @@ namespace ControllerSupport
 					if (Input.GetKeyUp (controllerBindings.B)) {
 						HandleBattleModeInput ("Cycle");
 					}
+				}
+			} else if (Input.GetKey (controllerBindings.BACK)) {
+				if (Input.GetKeyUp (controllerBindings.A)) {
+					battleMode.SendChatMessage ("Hello and good luck.");
+				}
+				if (Input.GetKeyUp (controllerBindings.B)) {
+					battleMode.SendChatMessage ("Good Game.");
+				}
+				if (Input.GetKeyUp (controllerBindings.X)) {
+					battleMode.SendChatMessage ("Nice play!");
+				}
+				if (Input.GetKeyUp (controllerBindings.Y)) {
+					battleMode.SendChatMessage (":)");
 				}
 			} else {
 				// End Turn

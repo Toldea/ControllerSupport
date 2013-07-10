@@ -115,6 +115,7 @@ namespace ControllerSupport {
 			// Add the displacement.
 			tileColumn += x;
 			tileRow += y;
+
 			// Constrain the position within the board boundries and limit to just the left side if needed.
 			ConstrainBoardPosition (allowRightBoardMovement);
 			TileOver (); // Fade in the new tile.
@@ -217,6 +218,9 @@ namespace ControllerSupport {
 			if (t != null) {
 				battleMode.tileOver (t.gameObject, tileRow, ConvertColumn());
 			}
+			// Custom colored tileOverlay (the little arrows inside a tile when you move a unit.
+			GameObject tileOverlay = (GameObject)typeof(Tile).GetField ("tileOverlay", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (t);
+			tileOverlay.renderer.material.color = new Color(.3f, 1f, .3f, .4f);
 		}
 		private void TileOut() {
 			Tile t = GetTile ();
@@ -230,7 +234,8 @@ namespace ControllerSupport {
 			deselectAllTilesMethodInfo.Invoke (battleMode, new object[] { });
 		}
 
-		private Tile GetTile() {
+		//private Tile GetTile() {
+		public Tile GetTile() {
 			// Get the colors for the left and right side.
 			TileColor leftColor = (battleMode.isLeftColor(TileColor.black)) ? TileColor.black : TileColor.white;
 			TileColor rightColor = (leftColor == TileColor.black) ? TileColor.white : TileColor.black;
