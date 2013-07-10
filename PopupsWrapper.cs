@@ -417,6 +417,28 @@ namespace ControllerSupport {
 						selectedIndex++;
 					}
 				}
+
+				//Calculate the scroll view height.
+				float scollViewHeight = Screen.height * 0.49f;
+				float num = (float)Screen.height * 0.03f;
+				scollViewHeight = scollViewHeight - 2f * num;
+				scollViewHeight *= .85f;
+				num = (float)Screen.height * 0.015f;
+				scollViewHeight = scollViewHeight - 4f - 2f * num;
+				// Calculate the total scroll size height.
+				float num2 = (float)Screen.height * 0.07f;
+				float num3 = num2 + num;
+				int halfDeckLength = (deckList.Count % 2 != 0) ? (deckList.Count / 2 + 1) : (deckList.Count / 2);
+				int deckListY = selectedIndex / 2;
+				float scrollSizeHeight = (float)(halfDeckLength - 1) * num3 + num2;
+				// Set the scroll position relative to the selected item.
+				Vector2 deckScroll = (Vector2)typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				deckScroll.y = (halfDeckLength - (halfDeckLength - deckListY)) * (scrollSizeHeight / halfDeckLength);
+				deckScroll.y -= (scollViewHeight - num3);
+				if (deckScroll.y < 0f) {
+					deckScroll.y = 0f;
+				}
+				typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (this.popups, deckScroll);
 			} else if (currentPopupType == PopupType.TOWER_CHALLENGE_SELECTOR) {
 				TowerLevels[] levels = App.TowerChallengeInfo.levels;
 				if (movement == Movement.Up) {
