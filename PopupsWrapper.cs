@@ -38,8 +38,10 @@ namespace ControllerSupport {
 
 			if (currentPopupType != PopupType.NONE) {
 				if (selectedIndex == -1) {
-					shouldDrawSeletionIndicator = true;
 					selectedIndex = 0;
+					if (!Input.GetMouseButtonUp(0)) {
+						shouldDrawSeletionIndicator = true;
+					}
 				}
 			} else {
 				selectedIndex = -1;
