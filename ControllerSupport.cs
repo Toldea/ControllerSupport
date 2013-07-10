@@ -100,7 +100,23 @@ namespace ControllerSupport
 		}
 
 		private void HandleBattleModeControls() {
-			// If the end screen is linked and it 'active', disable battle mode controls.
+			// Hotkeys for sending some basic chat messages.
+			if (Input.GetKey (controllerBindings.BACK)) {
+				if (Input.GetKeyUp (controllerBindings.A)) {
+					battleMode.SendChatMessage ("Hello and good luck.");
+				}
+				if (Input.GetKeyUp (controllerBindings.B)) {
+					battleMode.SendChatMessage ("Good Game.");
+				}
+				if (Input.GetKeyUp (controllerBindings.X)) {
+					battleMode.SendChatMessage ("Nice play!");
+				}
+				if (Input.GetKeyUp (controllerBindings.Y)) {
+					battleMode.SendChatMessage (":)");
+				}
+			}
+
+			// If the end screen is linked and it 'active', disable battle mode controls. (Chat shortcuts are still allowed)
 			if (endGameScreen.isActive ()) {
 				return;
 			}
@@ -128,20 +144,6 @@ namespace ControllerSupport
 					if (Input.GetKeyUp (controllerBindings.B)) {
 						HandleBattleModeInput ("Cycle");
 					}
-				}
-			} else if (Input.GetKey(controllerBindings.BACK)) {
-				// Hotkeys for sending some basic chat messages.
-				if (Input.GetKeyUp (controllerBindings.A)) {
-					battleMode.SendChatMessage("Hello and good luck.");
-				}
-				if (Input.GetKeyUp (controllerBindings.B)) {
-					battleMode.SendChatMessage ("Good Game.");
-				}
-				if (Input.GetKeyUp (controllerBindings.X)) {
-					battleMode.SendChatMessage ("Nice play!");
-				}
-				if (Input.GetKeyUp (controllerBindings.Y)) {
-					battleMode.SendChatMessage (":)");
 				}
 			} else {
 				// End Turn
@@ -249,6 +251,9 @@ namespace ControllerSupport
 			}
 			if (Input.GetKeyUp (controllerBindings.START)) {
 				lobbyMenu.HandleInput ("Start");
+			}
+			if (Input.GetKeyUp (controllerBindings.Y)) {
+				lobbyMenu.HandleInput ("ShowInvite");
 			}
 
 			// Left Stick Directional Input

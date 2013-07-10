@@ -143,6 +143,34 @@ namespace ControllerSupport {
 				} else {
 				}
 				break;
+			case "ShowInvite":
+				List<Invite> invites = (List<Invite>)typeof(InviteManager).GetField ("_invites", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (App.InviteManager);
+				if (invites.Count > 0) {
+					int i = 0;
+					App.Popups.KillCurrentPopup ();
+					for (int j = 0; j < invites.Count; j++) {
+						invites[j].inviteActive = false;
+					}
+					invites[i].inviteActive = true;
+					if (invites[i].message is GameMatchMessage) {
+						string text = "ranked";
+						if (invites[i].gameType == "MP_QUICKMATCH") {
+							text = "quick";
+						}
+						App.Popups.ShowOkCancel (App.InviteManager, "joingame", "Join game", "A " + text + " match has been found", "Join", "Decline");
+					} else {
+						if (invites[i].message is GameChallengeMessage) {
+							typeof(InviteManager).GetField ("challengeUserId", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (App.InviteManager, invites[i].inviterInfo.from.id);
+							App.Popups.ShowOkCancel (App.InviteManager, "challenge", "Challenge", invites[i].inviterInfo.from.name + " asked you to play a match", "Accept", "Decline");
+						} else {
+							if (invites[i].message is TradeInviteForwardMessage) {
+								typeof(InviteManager).GetField ("tradeUserId", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (App.InviteManager, invites[i].inviterInfo.from.id);
+								App.Popups.ShowOkCancel (App.InviteManager, "trade", "Trade", invites[i].inviterInfo.from.name + " asked you to trade", "Accept", "Decline");
+							}
+						}
+					}
+				}
+				break;
 			}
 		}
 
