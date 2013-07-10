@@ -220,7 +220,7 @@ namespace ControllerSupport {
 			}
 			// Custom colored tileOverlay (the little arrows inside a tile when you move a unit.
 			GameObject tileOverlay = (GameObject)typeof(Tile).GetField ("tileOverlay", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (t);
-			tileOverlay.renderer.material.color = new Color(.3f, 1f, .3f, .4f);
+			tileOverlay.renderer.material.color = new Color(.3f, 1f, .3f, .5f);
 		}
 		private void TileOut() {
 			Tile t = GetTile ();

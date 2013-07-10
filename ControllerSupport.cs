@@ -19,6 +19,7 @@ namespace ControllerSupport
 		private float battleModeAxisDeltaTime = 1000.0f;
 		private float lobbyMenuAxisDeltaTime = 1000.0f;
 		private float popupsAxisDeltaTime = 1000.0f;
+		private Tile selectedTile = null;
 
 		//initialize everything here, Game is loaded at this point
 		public ControllerSupport () {
@@ -61,6 +62,10 @@ namespace ControllerSupport
 				battleMode.Validate ((BattleMode)info.target);
 				handManager.Validate (battleMode.GetHandManager ());
 				HandleBattleModeControls ();
+				// Cache the currently selected tile (used to display a custom tinted hover indicator).
+				if (battleMode.InControlOfBoard ()) {
+					selectedTile = battleMode.GetTile ();
+				}
 			} else if (info.target.GetType () == typeof(EndGameScreen) && info.targetMethod.Equals ("OnGUI")) {
 				if (endGameScreen == null) {
 					endGameScreen = new EndGameScreenWrapper ((EndGameScreen)info.target);
@@ -104,11 +109,11 @@ namespace ControllerSupport
 				popups.OnGUI ();
 			} else if (info.target.GetType () == typeof(Tile) && info.targetMethod.Equals ("FixedUpdate")) {
 				// Custom, more clearly visable tile hover color.
-				if (battleMode.InControlOfBoard() && ((Tile)info.target).Equals(battleMode.GetTile())) {
-					Tile.SelectionType markerType = (Tile.SelectionType)typeof(Tile).GetField ("markerType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (((Tile)info.target));
+				if (battleMode.InControlOfBoard() && selectedTile != null && selectedTile.Equals(info.target)) {
+					Tile.SelectionType markerType = (Tile.SelectionType)typeof(Tile).GetField ("markerType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (selectedTile);
 					if (markerType == Tile.SelectionType.Hover) {
-						GameObject referenceTile = (GameObject)typeof(Tile).GetField ("referenceTile", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (((Tile)info.target));
-						referenceTile.renderer.material.color = new Color(.3f, 1f, .3f, .4f);
+						GameObject referenceTile = (GameObject)typeof(Tile).GetField ("referenceTile", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (selectedTile);
+						referenceTile.renderer.material.color = new Color(.3f, 1f, .3f, .5f);
 					}
 				}
 			}
