@@ -144,6 +144,7 @@ namespace ControllerSupport {
 				}
 				break;
 			case "ShowInvite":
+				// This currently assumes there is only 1 invite, not totally sure when you would receive multiples.
 				List<Invite> invites = (List<Invite>)typeof(InviteManager).GetField ("_invites", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (App.InviteManager);
 				if (invites.Count > 0) {
 					int i = 0;

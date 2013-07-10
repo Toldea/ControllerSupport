@@ -46,6 +46,107 @@ namespace ControllerSupport {
 			}
 		}
 
+		private void DrawPopupHoverIndicator() {
+			// Hide the selection indicator when the mouse moved.
+			if (oldMousePosition != Input.mousePosition) {
+				oldMousePosition = Input.mousePosition;
+				shouldDrawSeletionIndicator = false;
+			}
+
+			if (shouldDrawSeletionIndicator && selectedIndex > -1) {
+				currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				string okText = (string)typeof(Popups).GetField ("okText", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				string cancelText = (string)typeof(Popups).GetField ("cancelText", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+
+				if (this.currentPopupType != PopupType.NONE) {
+					GUI.depth = 4;
+					GUI.skin = buttonHighlightedUISkin;
+					int fontSize = GUI.skin.button.fontSize;
+					GUI.skin.box.fontSize = 10 + Screen.height / 72;
+					float num = (float)Screen.height * 0.03f;
+					Rect rect;
+					if (currentPopupType == PopupType.DECK_SELECTOR) {
+						rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.45f, (float)Screen.height * 0.255f, (float)Screen.height * 0.9f, (float)Screen.height * 0.49f);
+					} else {
+						if (currentPopupType == PopupType.TOWER_CHALLENGE_SELECTOR) {
+							rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.5f, (float)Screen.height * 0.1f, (float)Screen.height * 1f, (float)Screen.height * 0.8f);
+						} else {
+							if (currentPopupType == PopupType.SCROLL_TEXT) {
+								rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.5f, (float)Screen.height * 0.1f, (float)Screen.height * 1f, (float)Screen.height * 0.8f);
+							} else {
+								rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.35f, (float)Screen.height * 0.3f, (float)Screen.height * 0.7f, (float)Screen.height * 0.4f);
+							}
+						}
+					}
+					Rect rect2 = new Rect (rect.x + num, rect.y + num, rect.width - 2f * num, rect.height - 2f * num);
+					//float num2 = (float)Screen.height * 0.03f;
+					//Rect r = new Rect (rect2.xMax - num2, rect2.y, num2, num2);
+					//float num4 = (float)Screen.height * 0.055f;
+					//float height2 = rect2.height * ((this.currentPopupType != PopupType.SAVE_DECK && currentPopupType != PopupType.PURCHASE_PASSWORD_ENTRY) ? ((currentPopupType != PopupType.INFO_PROGCLOSE) ? 0.6f : 0.8f) : 0.35f);
+					int fontSize3 = GUI.skin.label.fontSize;
+					GUI.skin.label.fontSize = fontSize3;
+					if (currentPopupType == PopupType.OK || currentPopupType == PopupType.SCROLL_TEXT) {
+						Rect position2 = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.1f, rect2.yMax - (float)Screen.height * 0.05f, (float)Screen.height * 0.2f, (float)Screen.height * 0.05f);
+						GUI.Box (position2, okText);
+					} else {
+						if (currentPopupType == PopupType.OK_CANCEL || currentPopupType == PopupType.SAVE_DECK) {// || currentPopupType == PopupType.PURCHASE_PASSWORD_ENTRY) {
+							Rect r2 = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.21f, rect2.yMax - (float)Screen.height * 0.05f, (float)Screen.height * 0.2f, (float)Screen.height * 0.05f);
+							Rect r3 = new Rect ((float)Screen.width * 0.5f + (float)Screen.height * 0.01f, rect2.yMax - (float)Screen.height * 0.05f, (float)Screen.height * 0.2f, (float)Screen.height * 0.05f);
+							if (selectedIndex == 0) {
+								GUI.Box (r2, okText);
+							} else if (selectedIndex == 1) {
+								GUI.Box (r3, cancelText);
+							}
+						} else {
+							if (currentPopupType == PopupType.MULTIBUTTON) {
+								string[] buttonList = (string[])typeof(Popups).GetField ("buttonList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+								float num5 = (float)Screen.height * 0.05f;
+								float num6 = num5 + (float)Screen.height * 0.02f;
+								Rect r4 = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.1f, rect2.y + rect2.height * 0.55f - ((float)buttonList.Length / 2f - (float)selectedIndex) * num6 + (num6 - num5), (float)Screen.height * 0.2f, num5);
+								GUI.Box (r4, buttonList [selectedIndex]);
+							}
+						}
+					}
+					if (currentPopupType != PopupType.INFO_PROGCLOSE && currentPopupType != PopupType.OK && currentPopupType != PopupType.SCROLL_TEXT) {
+						/*
+						GUI.skin = this.closeButtonSkin;
+						if (this.GUIButton (r, string.Empty)) {
+							this.HidePopup ();
+							this.cancelCallback.PopupCancel (this.popupType);
+						}
+						GUI.skin = this.regularUISkin;
+						*/
+					}
+					if (currentPopupType == PopupType.DECK_SELECTOR) {
+						DrawDeckSelectorHoverIndicator (rect2);
+					} else if (currentPopupType == PopupType.TOWER_CHALLENGE_SELECTOR) {
+						DrawTowerChallengeSelectorHoverIndicator(rect2);
+					}
+					/*
+					if (currentPopupType == PopupType.JOIN_ROOM) {
+					} else {
+						if (currentPopupType == PopupType.SAVE_DECK || currentPopupType == PopupType.PURCHASE_PASSWORD_ENTRY) {
+						} else {
+							if (currentPopupType == PopupType.DECK_SELECTOR) {
+								this.DrawDeckSelector (rect2);
+							} else {
+								if (currentPopupType == PopupType.SHARD_PURCHASE_ONE) {
+								} else {
+									if (currentPopupType == PopupType.SHARD_PURCHASE_TWO) {
+									} else {
+										if (currentPopupType == PopupType.TOWER_CHALLENGE_SELECTOR) {
+											this.DrawTowerChallengeSelector (rect2);
+										}
+									}
+								}
+							}
+						}
+					}*/
+					GUI.skin.button.fontSize = fontSize;
+				}
+			}
+		}
+
 		private void DrawDeckSelectorHoverIndicator(Rect popupInner) {
 			List<DeckInfo> deckList = (List<DeckInfo>)typeof(Popups).GetField ("deckList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
 			bool showDeleteDeckIcon = (bool)typeof(Popups).GetField ("showDeleteDeckIcon", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
@@ -139,103 +240,29 @@ namespace ControllerSupport {
 			GUI.EndScrollView ();
 		}
 
-		private void DrawPopupHoverIndicator() {
-			// Hide the selection indicator when the mouse moved.
-			if (oldMousePosition != Input.mousePosition) {
-				oldMousePosition = Input.mousePosition;
-				shouldDrawSeletionIndicator = false;
+		private void DrawTowerChallengeSelectorHoverIndicator (Rect popupInner) {
+			TextAnchor alignment = GUI.skin.label.alignment;
+			Rect rect = new Rect (popupInner.x, popupInner.y + popupInner.height * 0.15f, popupInner.width, popupInner.height * 0.85f);
+			int fontSize = GUI.skin.label.fontSize;
+			TextAnchor alignment2 = GUI.skin.label.alignment;
+			bool wordWrap = GUI.skin.label.wordWrap;
+			GUI.skin.label.wordWrap = false;
+			GUI.skin.label.alignment = TextAnchor.UpperCenter;
+			TowerLevels[] levels = App.TowerChallengeInfo.levels;
+			if (levels == null) {
+				GUI.skin.label.wordWrap = wordWrap;
+				GUI.skin.label.alignment = alignment2;
+				return;
 			}
+			Rect position = new Rect (rect.x + rect.width * 0.4f + 5f + 25f, rect.y, rect.width * 0.6f - 40f, rect.height);
+			GUI.BeginGroup (position);
+			GUI.Box (new Rect ((rect.width * 0.6f - 40f) / 2f - rect.width * 0.15f, rect.height - 65f, rect.width * 0.3f, 50f), "Play Trial");
+			GUI.EndGroup ();
 
-			if (shouldDrawSeletionIndicator && selectedIndex > -1) {
-				currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-				string okText = (string)typeof(Popups).GetField ("okText", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-				string cancelText = (string)typeof(Popups).GetField ("cancelText", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-
-				if (this.currentPopupType != PopupType.NONE) {
-					GUI.depth = 4;
-					GUI.skin = buttonHighlightedUISkin;
-					int fontSize = GUI.skin.button.fontSize;
-					GUI.skin.box.fontSize = 10 + Screen.height / 72;
-					float num = (float)Screen.height * 0.03f;
-					Rect rect;
-					if (currentPopupType == PopupType.DECK_SELECTOR) {
-						rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.45f, (float)Screen.height * 0.255f, (float)Screen.height * 0.9f, (float)Screen.height * 0.49f);
-					} else {
-						if (currentPopupType == PopupType.TOWER_CHALLENGE_SELECTOR) {
-							rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.5f, (float)Screen.height * 0.1f, (float)Screen.height * 1f, (float)Screen.height * 0.8f);
-						} else {
-							if (currentPopupType == PopupType.SCROLL_TEXT) {
-								rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.5f, (float)Screen.height * 0.1f, (float)Screen.height * 1f, (float)Screen.height * 0.8f);
-							} else {
-								rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.35f, (float)Screen.height * 0.3f, (float)Screen.height * 0.7f, (float)Screen.height * 0.4f);
-							}
-						}
-					}
-					Rect rect2 = new Rect (rect.x + num, rect.y + num, rect.width - 2f * num, rect.height - 2f * num);
-					//float num2 = (float)Screen.height * 0.03f;
-					//Rect r = new Rect (rect2.xMax - num2, rect2.y, num2, num2);
-					//float num4 = (float)Screen.height * 0.055f;
-					//float height2 = rect2.height * ((this.currentPopupType != PopupType.SAVE_DECK && currentPopupType != PopupType.PURCHASE_PASSWORD_ENTRY) ? ((currentPopupType != PopupType.INFO_PROGCLOSE) ? 0.6f : 0.8f) : 0.35f);
-					int fontSize3 = GUI.skin.label.fontSize;
-					GUI.skin.label.fontSize = fontSize3;
-					if (currentPopupType == PopupType.OK || currentPopupType == PopupType.SCROLL_TEXT) {
-						Rect position2 = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.1f, rect2.yMax - (float)Screen.height * 0.05f, (float)Screen.height * 0.2f, (float)Screen.height * 0.05f);
-						GUI.Box (position2, okText);
-					} else {
-						if (currentPopupType == PopupType.OK_CANCEL || currentPopupType == PopupType.SAVE_DECK) {// || currentPopupType == PopupType.PURCHASE_PASSWORD_ENTRY) {
-							Rect r2 = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.21f, rect2.yMax - (float)Screen.height * 0.05f, (float)Screen.height * 0.2f, (float)Screen.height * 0.05f);
-							Rect r3 = new Rect ((float)Screen.width * 0.5f + (float)Screen.height * 0.01f, rect2.yMax - (float)Screen.height * 0.05f, (float)Screen.height * 0.2f, (float)Screen.height * 0.05f);
-							if (selectedIndex == 0) {
-								GUI.Box (r2, okText);
-							} else if (selectedIndex == 1) {
-								GUI.Box (r3, cancelText);
-							}
-						} else {
-							if (currentPopupType == PopupType.MULTIBUTTON) {
-								string[] buttonList = (string[])typeof(Popups).GetField ("buttonList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-								float num5 = (float)Screen.height * 0.05f;
-								float num6 = num5 + (float)Screen.height * 0.02f;
-								Rect r4 = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.1f, rect2.y + rect2.height * 0.55f - ((float)buttonList.Length / 2f - (float)selectedIndex) * num6 + (num6 - num5), (float)Screen.height * 0.2f, num5);
-								GUI.Box (r4, buttonList [selectedIndex]);
-							}
-						}
-					}
-					if (currentPopupType != PopupType.INFO_PROGCLOSE && currentPopupType != PopupType.OK && currentPopupType != PopupType.SCROLL_TEXT) {
-						/*
-						GUI.skin = this.closeButtonSkin;
-						if (this.GUIButton (r, string.Empty)) {
-							this.HidePopup ();
-							this.cancelCallback.PopupCancel (this.popupType);
-						}
-						GUI.skin = this.regularUISkin;
-						*/
-					}
-					if (currentPopupType == PopupType.DECK_SELECTOR) {
-						DrawDeckSelectorHoverIndicator (rect2);
-					}
-					/*
-					if (currentPopupType == PopupType.JOIN_ROOM) {
-					} else {
-						if (currentPopupType == PopupType.SAVE_DECK || currentPopupType == PopupType.PURCHASE_PASSWORD_ENTRY) {
-						} else {
-							if (currentPopupType == PopupType.DECK_SELECTOR) {
-								this.DrawDeckSelector (rect2);
-							} else {
-								if (currentPopupType == PopupType.SHARD_PURCHASE_ONE) {
-								} else {
-									if (currentPopupType == PopupType.SHARD_PURCHASE_TWO) {
-									} else {
-										if (currentPopupType == PopupType.TOWER_CHALLENGE_SELECTOR) {
-											this.DrawTowerChallengeSelector (rect2);
-										}
-									}
-								}
-							}
-						}
-					}*/
-					GUI.skin.button.fontSize = fontSize;
-				}
-			}
+			GUI.skin.label.fontSize = fontSize;
+			GUI.skin.label.normal.textColor = Color.white;
+			GUI.skin.label.alignment = alignment;
+			GUI.skin.label.wordWrap = wordWrap;
 		}
 
 		public void HandleInput(string inputType) {
@@ -255,6 +282,8 @@ namespace ControllerSupport {
 					AcceptMultibuttonPopup ();
 				} else if (currentPopupType == PopupType.DECK_SELECTOR) {
 					AcceptDeckSelectorPopup ();
+				} else if (currentPopupType == PopupType.TOWER_CHALLENGE_SELECTOR) {
+					AcceptTowerChallengePopup ();
 				}
 				selectedIndex = -1;
 				break;
@@ -326,6 +355,12 @@ namespace ControllerSupport {
 			DeckInfo deckInfo = deckList[selectedIndex];
 			((IDeckCallback)typeof(Popups).GetField ("deckChosenCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups)).PopupDeckChosen(deckInfo);
 		}
+		private void AcceptTowerChallengePopup() {
+			HidePopupMethodInfo.Invoke (popups, new object[] { });
+			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
+			TowerLevels[] levels = App.TowerChallengeInfo.levels;
+			App.GameActionManager.PopupTowerChallengeChosen(levels [selectedIndex].id);
+		}
 		private void CancelPopup() {
 			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
 			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
@@ -378,10 +413,40 @@ namespace ControllerSupport {
 					}
 				} else if (movement == Movement.Right) {
 					// We are on the left side if selected index currently is even.
-					if (selectedIndex % 2 == 0 && selectedIndex < listCount-1) {
+					if (selectedIndex % 2 == 0 && selectedIndex < listCount - 1) {
 						selectedIndex++;
 					}
 				}
+			} else if (currentPopupType == PopupType.TOWER_CHALLENGE_SELECTOR) {
+				TowerLevels[] levels = App.TowerChallengeInfo.levels;
+				if (movement == Movement.Up) {
+					if (selectedIndex > 0) {
+						selectedIndex--;
+					}
+				} else if (movement == Movement.Down) {
+					if (selectedIndex + 1 < levels.Length) {
+						selectedIndex++;
+					}
+				}
+				// Set the selectedIndex as the selectedChallengeID.
+				typeof(Popups).GetField ("selectedChallengeID", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (popups, selectedIndex);
+				// Calculate the scroll view height.
+				float scollViewHeight = Screen.height * 0.8f;
+				float num = (float)Screen.height * 0.03f;
+				scollViewHeight = scollViewHeight - 2f * num;
+				scollViewHeight *= .85f;
+				num = (float)Screen.height * 0.015f;
+				scollViewHeight = scollViewHeight - 4f - 2f * num;
+				// Calculate the total scroll size height.
+				float scrollSizeHeight = levels.Length * 55;
+				// Set the scroll position relative to the selected item.
+				Vector2 deckScroll = (Vector2)typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				deckScroll.y = (levels.Length - (levels.Length - selectedIndex)) * (scrollSizeHeight / levels.Length);
+				deckScroll.y -= (scollViewHeight - 55f);
+				if (deckScroll.y < 0f) {
+					deckScroll.y = 0f;
+				}
+				typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (this.popups, deckScroll);
 			}
 		}
 
