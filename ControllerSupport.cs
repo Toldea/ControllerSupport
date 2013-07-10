@@ -41,6 +41,7 @@ namespace ControllerSupport
 					scrollsTypes["EndGameScreen"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("Update")[0],
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("OnGUI")[0],
+					scrollsTypes["LobbyMenu"].Methods.GetMethod("fadeOutScene")[0],
 					scrollsTypes["Login"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["Popups"].Methods.GetMethod("OnGUI")[0],
 				};
@@ -54,16 +55,16 @@ namespace ControllerSupport
 			if (info.target.GetType () == typeof(BattleMode) && info.targetMethod.Equals ("handleInput")) {
 				if (info.target.GetType () == typeof(BattleMode) && battleMode == null) {
 					battleMode = new BattleModeWrapper ((BattleMode)info.target);
-					handManager = new HandManagerWrapper (battleMode.GetHandManager());
+					handManager = new HandManagerWrapper (battleMode.GetHandManager ());
 				}
 				battleMode.Validate ((BattleMode)info.target);
-				handManager.Validate (battleMode.GetHandManager());
+				handManager.Validate (battleMode.GetHandManager ());
 				HandleBattleModeControls ();
 			} else if (info.target.GetType () == typeof(EndGameScreen) && info.targetMethod.Equals ("OnGUI")) {
 				if (endGameScreen == null) {
 					endGameScreen = new EndGameScreenWrapper ((EndGameScreen)info.target);
 				}
-				endGameScreen.Validate((EndGameScreen)info.target);
+				endGameScreen.Validate ((EndGameScreen)info.target);
 				HandleEndGameScreenControls ();
 			} else if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("Update")) {
 				if (lobbyMenu == null) {
@@ -78,6 +79,11 @@ namespace ControllerSupport
 				} else {
 					HandleLobbyMenuControls ();
 				}
+			} else if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("fadeOutScene")) {
+				if (lobbyMenu == null) {
+					lobbyMenu = new LobbyMenuWrapper ();
+				}
+				lobbyMenu.RegisterCurrentScene ();
 			} else if (info.target.GetType () == typeof(Login) && info.targetMethod.Equals ("OnGUI")) {
 				if (login == null) {
 					login = new LoginWrapper ((Login)info.target);

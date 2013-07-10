@@ -175,6 +175,10 @@ namespace ControllerSupport {
 			}
 		}
 
+		public void RegisterCurrentScene() {
+			lastScene = (string)typeof(LobbyMenu).GetField ("_sceneToLoad", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (lobbyMenu);
+		}
+
 		private void MoveSelectionIndicator(Movement movement) {
 			// Prevent moving the selection indicator when some popup is open.
 			if (App.Popups.IsShowingPopup ()) {
@@ -265,15 +269,10 @@ namespace ControllerSupport {
 		}
 
 		private string GetCurrentSceneName() {
-			string currentScene = (string)typeof(LobbyMenu).GetField ("_sceneToLoad", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (lobbyMenu);
-			if (currentScene == null || currentScene == string.Empty) {
-				if (lastScene != null && lastScene != string.Empty) {
-					return lastScene;
-				} else {
-					return "_Lobby";
-				}
+			if (lastScene != null && lastScene != string.Empty) {
+				return lastScene;
 			} else {
-				return currentScene;
+				return "_Lobby";
 			}
 
 		}
