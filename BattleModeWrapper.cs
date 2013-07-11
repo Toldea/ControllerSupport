@@ -15,6 +15,8 @@ namespace ControllerSupport {
 		private bool controlBoard;
 		private int tileRow;
 		private int tileColumn;
+		private float lastPlayedCardTimeStamp = -1000f;
+		private float viewingCardTimeStamp = -1000f;
 
 		public BattleModeWrapper (BattleMode battleMode) {
 			Console.WriteLine ("ControllerSupport: Creating BattleMode Wrapper.");
@@ -40,6 +42,62 @@ namespace ControllerSupport {
 			tileColumn = 1;
 		}
 
+		public void CycleShowRecentlyPlayedCards() {
+			// Get a list of all recently played scrolls (both ours and the enemies!).
+			TileColor leftColor = (battleMode.isLeftColor(TileColor.black)) ? TileColor.black : TileColor.white;
+			TileColor rightColor = (leftColor == TileColor.black) ? TileColor.white : TileColor.black;
+			List<Transform> leftSpellList = (List<Transform>)battleMode.GetType().GetMethod("getSpellListFor", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(battleMode, new object[]{leftColor});
+			List<Transform> rightSpellList = (List<Transform>)battleMode.GetType().GetMethod("getSpellListFor", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(battleMode, new object[]{rightColor});
+			List<Transform> spellList = new List<Transform> ();
+			spellList.AddRange (leftSpellList);
+			spellList.AddRange (rightSpellList);
+			if (spellList.Count == 0) {
+				return;
+			}
+			// Sort them by their played timestamp.
+			spellList.Sort(delegate(Transform spellObject1, Transform spellObject2) {
+				CardView spell1CardView = spellObject1.GetComponent<CardView> ();
+				CardView spell2CardView = spellObject2.GetComponent<CardView> ();
+				float spell1StartTime = (float)typeof(CardView).GetField ("startTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (spell1CardView);
+				float spell2StartTime = (float)typeof(CardView).GetField ("startTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (spell2CardView);
+				return (spell2StartTime.CompareTo(spell1StartTime));
+			});
+
+			// Get the timestamp from the most currently played card.
+			CardView lastPlayedCard = spellList[0].GetComponent<CardView>();
+			float newLastPlayedCardTimeStamp = (float)typeof(CardView).GetField ("startTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (lastPlayedCard);
+			int viewingCardIndex = 0;
+			// If we don't have a valid lastPlayedCard time stamp or if a newer card has been played since then, set our currently viewing card stamp to the latest card stamp.
+			if (lastPlayedCardTimeStamp < .0f || lastPlayedCardTimeStamp < newLastPlayedCardTimeStamp) {
+				lastPlayedCardTimeStamp = newLastPlayedCardTimeStamp;
+				viewingCardTimeStamp = newLastPlayedCardTimeStamp;
+				viewingCardIndex = 0;
+			} else {
+				// We have a valid and up to date time stamp for the last played card, cycle to the next card in the list.
+				float timeStamp;
+				for (int i = 1; i < spellList.Count; i++) {
+					// Loop through each spell until we hit one with a time stamp earlier as our viewingCardTimeStamp.
+					CardView cv = spellList [i].GetComponent<CardView>();
+					timeStamp = (float)typeof(CardView).GetField ("startTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (cv);
+					if (timeStamp < viewingCardTimeStamp) {
+						viewingCardTimeStamp = timeStamp;
+						viewingCardIndex = i;
+						break;
+					}
+					// If we hit the last spell and it didn't had an earlier time stamp, cycle back to the first one.
+					if (i == spellList.Count - 1) {
+						viewingCardTimeStamp = newLastPlayedCardTimeStamp;
+						viewingCardIndex = 0;
+					}
+				}
+			}
+
+			// Select the card we want to view next.
+			CardView cardView = spellList[viewingCardIndex].GetComponent<CardView> ();
+			battleMode.GetType().GetMethod("showCardRule", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(battleMode, new object[]{cardView.getCardInfo()});
+			typeof(BattleMode).GetField ("unitRuleShowing", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleMode, true);
+		}
+
 		public void CardClicked(CardView cardView, int mouseButton) {
 			cardClickedMethodInfo.Invoke (battleMode, new object[] { cardView, mouseButton });
 		}
@@ -49,7 +107,9 @@ namespace ControllerSupport {
 		}
 
 		public void EndTurnPressed() {
-			battleMode.endturnPressed ();
+			if (!TurnEnded ()) {
+				battleMode.endturnPressed ();
+			}
 		}
 
 		public void ShowMenu() {
@@ -240,7 +300,6 @@ namespace ControllerSupport {
 			deselectAllTilesMethodInfo.Invoke (battleMode, new object[] { });
 		}
 
-		//private Tile GetTile() {
 		public Tile GetTile() {
 			// Get the colors for the left and right side.
 			TileColor leftColor = (battleMode.isLeftColor(TileColor.black)) ? TileColor.black : TileColor.white;

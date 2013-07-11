@@ -196,6 +196,10 @@ namespace ControllerSupport
 				if (Input.GetKeyUp (controllerBindings.B)) {
 					HandleBattleModeInput ("Cancel");
 				}
+				// Cycle through played cards
+				if (Input.GetKeyUp(controllerBindings.X)) {
+					battleMode.CycleShowRecentlyPlayedCards ();
+				}
 				// Reshow the chat
 				if (Input.GetKeyUp (controllerBindings.BACK)) {
 					battleMode.ShowChat ();
