@@ -14,11 +14,13 @@ namespace ControllerSupport
 		private LobbyMenuWrapper lobbyMenu = null;
 		private LoginWrapper login = null;
 		private PopupsWrapper popups = null;
+		private GUIBattleModeMenuWrapper battleModeMenu = null;
 		private ControllerKeyBindings controllerBindings;
 		private const float axisDelay = .2f;
 		private float battleModeAxisDeltaTime = 1000.0f;
 		private float lobbyMenuAxisDeltaTime = 1000.0f;
 		private float popupsAxisDeltaTime = 1000.0f;
+		private float battleModeMenuAxisDeltaTime = 1000.0f;
 		private Tile selectedTile = null;
 
 		//initialize everything here, Game is loaded at this point
@@ -58,10 +60,12 @@ namespace ControllerSupport
 				if (info.target.GetType () == typeof(BattleMode) && battleMode == null) {
 					battleMode = new BattleModeWrapper ((BattleMode)info.target);
 					handManager = new HandManagerWrapper (battleMode.GetHandManager ());
+					battleModeMenu = new GUIBattleModeMenuWrapper (battleMode.GetMenu());
 				}
 				battleMode.Validate ((BattleMode)info.target);
 				handManager.Validate (battleMode.GetHandManager ());
 				HandleBattleModeControls ();
+				HandleBattleModeMenuControls ();
 				// Cache the currently selected tile (used to display a custom tinted hover indicator).
 				if (battleMode.InControlOfBoard ()) {
 					selectedTile = battleMode.GetTile ();
@@ -113,7 +117,7 @@ namespace ControllerSupport
 					Tile.SelectionType markerType = (Tile.SelectionType)typeof(Tile).GetField ("markerType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (selectedTile);
 					if (markerType == Tile.SelectionType.Hover) {
 						GameObject referenceTile = (GameObject)typeof(Tile).GetField ("referenceTile", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (selectedTile);
-						referenceTile.renderer.material.color = new Color(.3f, 1f, .3f, .5f);
+						referenceTile.renderer.material.color = new Color(.3f, 1f, .3f, .6f);
 					}
 				}
 			}
@@ -122,7 +126,15 @@ namespace ControllerSupport
 
 		private void HandleBattleModeControls() {
 			// If the end screen is linked and it 'active', disable battle mode controls.
-			if (endGameScreen.isActive ()) {
+			if (endGameScreen.isActive () || battleMode.ShowingMenu()) {
+				return;
+			}
+			// Toggle Show Menu
+			if (Input.GetKeyUp (controllerBindings.START)) {
+				HandleBattleModeInput ("ShowMenu");
+			}
+			// Also disable battle mode controls when the menu is showing.
+			if (battleMode.ShowingMenu()) {
 				return;
 			}
 
@@ -167,10 +179,6 @@ namespace ControllerSupport
 				// End Turn
 				if (Input.GetKeyUp (controllerBindings.Y)) {
 					HandleBattleModeInput ("EndTurn");
-				}
-				// Show Menu
-				if (Input.GetKeyUp (controllerBindings.START)) {
-					HandleBattleModeInput ("ShowMenu");
 				}
 				// Toggle Show Stats
 				if (Input.GetKeyUp (controllerBindings.RIGHT_STICK_CLICK)) {
@@ -358,6 +366,39 @@ namespace ControllerSupport
 				}
 				if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
 					popups.HandleInput ("Down");
+				}
+			}
+		}
+
+		private void HandleBattleModeMenuControls () {
+			// Update the Axis delta time. (Used to control how often axis input is registered)
+			battleModeMenuAxisDeltaTime += Time.deltaTime;
+			if (battleMode.ShowingMenu ()) {
+				// Button Input
+				if (Input.GetKeyUp (controllerBindings.A)) {
+					battleModeMenu.HandleInput ("Accept");
+				}
+				if (Input.GetKeyUp (controllerBindings.B)) {
+					battleModeMenu.HandleInput ("Cancel");
+				}
+
+				if (battleModeMenuAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) > .5f) {
+					battleModeMenuAxisDeltaTime = .0f;
+					battleModeMenu.HandleInput ("Up");
+				}
+				if (battleModeMenuAxisDeltaTime > axisDelay && Input.GetAxis(controllerBindings.LEFT_STICK_VERTICAL_AXIS) < -0.5f) {
+					battleModeMenuAxisDeltaTime = .0f;
+					battleModeMenu.HandleInput ("Down");
+				}
+
+				// OSX Specific Controller DPAD Controls (as they are buttons in OSX and an axis in Windows).
+				if (OsSpec.getOS () == OSType.OSX) {
+					if (Input.GetKeyDown (controllerBindings.DPAD_UP)) {
+						battleModeMenu.HandleInput ("Up");
+					}
+					if (Input.GetKeyDown (controllerBindings.DPAD_DOWN)) {
+						battleModeMenu.HandleInput ("Down");
+					}
 				}
 			}
 		}

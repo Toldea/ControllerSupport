@@ -59,6 +59,7 @@
     <Compile Include="LobbyMenuWrapper.cs" />
     <Compile Include="LoginWrapper.cs" />
     <Compile Include="PopupsWrapper.cs" />
+    <Compile Include="GUIBattleModeMenuWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

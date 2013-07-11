@@ -55,6 +55,12 @@ namespace ControllerSupport {
 		public void ShowMenu() {
 			gameMenu.toggleMenu ();
 		}
+		public bool ShowingMenu() {
+			return gameMenu.showMenu;
+		}
+		public GUIBattleModeMenu GetMenu() {
+			return gameMenu;
+		}
 
 		public void ToggleUnitStats() {
 			toggleUnitStatsMethodInfo.Invoke (battleMode, new object[] { });
@@ -220,7 +226,7 @@ namespace ControllerSupport {
 			}
 			// Custom colored tileOverlay (the little arrows inside a tile when you move a unit.
 			GameObject tileOverlay = (GameObject)typeof(Tile).GetField ("tileOverlay", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (t);
-			tileOverlay.renderer.material.color = new Color(.3f, 1f, .3f, .5f);
+			tileOverlay.renderer.material.color = new Color(.3f, 1f, .3f, .6f);
 		}
 		private void TileOut() {
 			Tile t = GetTile ();
