@@ -7,6 +7,9 @@ namespace ControllerSupport {
 		public ControllerKeyBindings () {
 			osType = OsSpec.getOS ();
 		}
+		public void SetUsePS3(bool usePS3) {
+			useOSX_PS3 = usePS3;
+		}
 
 		/**** Axis Mappings ****/
 		public string LEFT_STICK_HORIZONTAL_AXIS {

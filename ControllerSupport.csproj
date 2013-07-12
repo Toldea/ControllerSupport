@@ -48,6 +48,9 @@
     <Reference Include="Mono.Cecil">
       <HintPath>..\Mono.Cecil.dll</HintPath>
     </Reference>
+    <Reference Include="JsonFx">
+      <HintPath>..\JsonFx.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -60,6 +63,8 @@
     <Compile Include="LoginWrapper.cs" />
     <Compile Include="PopupsWrapper.cs" />
     <Compile Include="GUIBattleModeMenuWrapper.cs" />
+    <Compile Include="ConfigManager.cs" />
+    <Compile Include="ConfigGUI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

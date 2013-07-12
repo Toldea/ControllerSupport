@@ -16,6 +16,8 @@ namespace ControllerSupport
 		private PopupsWrapper popups = null;
 		private GUIBattleModeMenuWrapper battleModeMenu = null;
 		private ControllerKeyBindings controllerBindings;
+		private ConfigManager configManager = null;
+		private ConfigGUI configGUI = null;
 		private const float axisDelay = .2f;
 		private float battleModeAxisDeltaTime = 1000.0f;
 		private float lobbyMenuAxisDeltaTime = 1000.0f;
@@ -27,6 +29,13 @@ namespace ControllerSupport
 		public ControllerSupport () {
 			Console.WriteLine("Loaded mod ControllerSupport");
 			controllerBindings = new ControllerKeyBindings ();
+			configManager = new ConfigManager (this.OwnFolder ());
+			controllerBindings.SetUsePS3 (configManager.UsingPS3 ());
+		}
+
+		private void ShowConfigGUI() {
+			configGUI = new ConfigGUI (configManager, GetVersion (), controllerBindings);
+			configManager.SetVersion (GetVersion ());
 		}
 
 		public static string GetName () {
@@ -79,6 +88,9 @@ namespace ControllerSupport
 			} else if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("Update")) {
 				if (lobbyMenu == null) {
 					lobbyMenu = new LobbyMenuWrapper ();
+					if (configGUI == null) {
+						ShowConfigGUI ();
+					}
 				}
 				if (popups == null) {
 					popups = new PopupsWrapper (App.Popups);
