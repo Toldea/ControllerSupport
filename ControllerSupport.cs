@@ -14,6 +14,7 @@ namespace ControllerSupport
 		private LobbyMenuWrapper lobbyMenu = null;
 		private LoginWrapper login = null;
 		private PopupsWrapper popups = null;
+		private SettingsMenuWrapper settingsMenu = null;
 		private GUIBattleModeMenuWrapper battleModeMenu = null;
 		private ControllerKeyBindings controllerBindings;
 		private ConfigManager configManager = null;
@@ -29,12 +30,12 @@ namespace ControllerSupport
 		public ControllerSupport () {
 			Console.WriteLine("Loaded mod ControllerSupport");
 			controllerBindings = new ControllerKeyBindings ();
-			configManager = new ConfigManager (this.OwnFolder ());
+			configManager = new ConfigManager (this.OwnFolder (), controllerBindings);
 			controllerBindings.SetUsePS3 (configManager.UsingPS3 ());
 		}
 
 		private void ShowConfigGUI() {
-			configGUI = new ConfigGUI (configManager, GetVersion (), controllerBindings);
+			configGUI = new ConfigGUI (configManager, GetVersion ());
 			configManager.SetVersion (GetVersion ());
 		}
 
@@ -56,6 +57,7 @@ namespace ControllerSupport
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("fadeOutScene")[0],
 					scrollsTypes["Login"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["Popups"].Methods.GetMethod("OnGUI")[0],
+					scrollsTypes["SettingsMenu"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["Tile"].Methods.GetMethod("FixedUpdate")[0],
 				};
 			}
@@ -132,13 +134,18 @@ namespace ControllerSupport
 						referenceTile.renderer.material.color = new Color(.3f, 1f, .3f, .6f);
 					}
 				}
+			} else if (info.target.GetType () == typeof(SettingsMenu) && info.targetMethod.Equals ("OnGUI")) {
+				if (settingsMenu == null) {
+					settingsMenu = new SettingsMenuWrapper ((SettingsMenu)info.target, configManager);
+				}
+				settingsMenu.OnGUI ();
 			}
 			return;
 		}
 
 		private void HandleBattleModeControls() {
 			// If the end screen is linked and it 'active', disable battle mode controls.
-			if (endGameScreen.isActive () || battleMode.ShowingMenu()) {
+			if (endGameScreen.isActive ()) {
 				return;
 			}
 			// Toggle Show Menu

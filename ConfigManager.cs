@@ -5,12 +5,14 @@ using JsonFx.Json;
 
 namespace ControllerSupport {
 	public class ConfigManager {
+		private ControllerKeyBindings controllerBindings;
 		private string modFolder;
 		private string configPath;
 		private Dictionary<String, object> config;
 
-		public ConfigManager (string modFolder) {
+		public ConfigManager (string modFolder, ControllerKeyBindings controllerBindings) {
 			this.modFolder = modFolder;
+			this.controllerBindings = controllerBindings;
 			configPath = modFolder + Path.DirectorySeparatorChar + "config";
 
 			// Create a config folder.
@@ -62,6 +64,7 @@ namespace ControllerSupport {
 
 		public void SetUsePS3(bool usePS3) {
 			Add ("use_ps3", usePS3);
+			controllerBindings.SetUsePS3(usePS3);
 			WriteConfig ();
 		}
 		public bool UsingPS3() {
