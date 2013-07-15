@@ -268,7 +268,7 @@ namespace ControllerSupport {
 			return menuSceneNames [index];
 		}
 
-		private string GetCurrentSceneName() {
+		public string GetCurrentSceneName() {
 			if (lastScene != null && lastScene != string.Empty) {
 				return lastScene;
 			} else {

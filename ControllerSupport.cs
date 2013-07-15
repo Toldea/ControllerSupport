@@ -24,7 +24,7 @@ namespace ControllerSupport
 		private float lobbyMenuAxisDeltaTime = 1000.0f;
 		private float popupsAxisDeltaTime = 1000.0f;
 		private float battleModeMenuAxisDeltaTime = 1000.0f;
-		private Tile selectedTile = null;
+		//private Tile selectedTile = null;
 
 		//initialize everything here, Game is loaded at this point
 		public ControllerSupport () {
@@ -58,7 +58,7 @@ namespace ControllerSupport
 					scrollsTypes["Login"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["Popups"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["SettingsMenu"].Methods.GetMethod("OnGUI")[0],
-					scrollsTypes["Tile"].Methods.GetMethod("FixedUpdate")[0],
+					//scrollsTypes["Tile"].Methods.GetMethod("FixedUpdate")[0],
 				};
 			}
 			catch {
@@ -78,9 +78,9 @@ namespace ControllerSupport
 				HandleBattleModeControls ();
 				HandleBattleModeMenuControls ();
 				// Cache the currently selected tile (used to display a custom tinted hover indicator).
-				if (battleMode.InControlOfBoard ()) {
-					selectedTile = battleMode.GetTile ();
-				}
+				//if (battleMode.InControlOfBoard ()) {
+				//	selectedTile = battleMode.GetTile ();
+				//}
 			} else if (info.target.GetType () == typeof(EndGameScreen) && info.targetMethod.Equals ("OnGUI")) {
 				if (endGameScreen == null) {
 					endGameScreen = new EndGameScreenWrapper ((EndGameScreen)info.target);
@@ -125,7 +125,7 @@ namespace ControllerSupport
 					popups = new PopupsWrapper (App.Popups);
 				}
 				popups.OnGUI ();
-			} else if (info.target.GetType () == typeof(Tile) && info.targetMethod.Equals ("FixedUpdate")) {
+			}/* else if (info.target.GetType () == typeof(Tile) && info.targetMethod.Equals ("FixedUpdate")) {
 				// Custom, more clearly visable tile hover color.
 				if (battleMode.InControlOfBoard() && selectedTile != null && selectedTile.Equals(info.target)) {
 					Tile.SelectionType markerType = (Tile.SelectionType)typeof(Tile).GetField ("markerType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (selectedTile);
@@ -134,11 +134,13 @@ namespace ControllerSupport
 						referenceTile.renderer.material.color = new Color(.3f, 1f, .3f, .6f);
 					}
 				}
-			} else if (info.target.GetType () == typeof(SettingsMenu) && info.targetMethod.Equals ("OnGUI")) {
+			}*/ else if (info.target.GetType () == typeof(SettingsMenu) && info.targetMethod.Equals ("OnGUI")) {
 				if (settingsMenu == null) {
 					settingsMenu = new SettingsMenuWrapper ((SettingsMenu)info.target, configManager);
 				}
-				settingsMenu.OnGUI ();
+				if (lobbyMenu.GetCurrentSceneName () == "_Settings") {
+					settingsMenu.OnGUI ();
+				}
 			}
 			return;
 		}
