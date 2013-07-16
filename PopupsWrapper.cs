@@ -24,7 +24,6 @@ namespace ControllerSupport {
 			GUISkin regularUISkin = (GUISkin)Resources.Load ("_GUISkins/RegularUI");
 			buttonHighlightedUISkin = (GUISkin)GameObject.Instantiate (regularUISkin);
 			buttonHighlightedUISkin.box.font = regularUISkin.button.font;
-			Console.WriteLine ("ControllerSupport: DefaultFont: " + buttonHighlightedUISkin.box.font.name);
 			buttonHighlightedUISkin.box.fontStyle = regularUISkin.button.fontStyle;
 			buttonHighlightedUISkin.box.fontSize = regularUISkin.button.fontSize;
 			buttonHighlightedUISkin.box.normal.textColor = regularUISkin.button.hover.textColor;

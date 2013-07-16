@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace ControllerSupport {
 	public class ConfigGUI : IOkCancelCallback, IOkStringCancelCallback {
@@ -12,9 +13,9 @@ namespace ControllerSupport {
 
 			if (configManager.IsNewInstall ()) {
 				if (OsSpec.getOS () == OSType.OSX) {
-					App.Popups.ShowOkCancel (this, "choose_controller", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n(other screens coming soon)\n\nWhat Controller would you like to use?", "Xbox 360", "PS3");
+					App.Popups.ShowOkCancel (this, "choose_controller", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n(Other screens coming soon!)\n\nWhat Controller would you like to use?", "Xbox 360", "PS3");
 				} else {
-					App.Popups.ShowOk(null, "new_install", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n(other screens coming soon)\n\nThis mod supports Xbox 360 controllers natively and PS3 controlls through MotionJoy (set to Xbox emulator mode).", "Controls");
+					App.Popups.ShowOk(null, "new_install", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n(Other screens coming soon!)\n\nThis mod supports Xbox 360 controllers natively and PS3 controlls through MotionJoy (set to Xbox emulator mode).", "Controls");
 				}
 			} else if (configManager.IsNewVersion (version)) {
 				Console.WriteLine ("ControllerSupport: ConfigManager: New version detected!");
@@ -38,33 +39,63 @@ namespace ControllerSupport {
 		public void PopupOk(String type, String choice) {}
 
 		public void ShowControlScheme() {
-			App.Popups.ShowScrollText (this, "control_scheme", "Controls", 
-			                           "[Main Menu]\n" +
-			                           "Left Stick / (OSX)DPad: Move\n" +
-			                           "A: Accept\n" +
-			                           "B: Cancel\n" +
-			                           "Y: View match invite\n" +
-			                           "LT/RT: Switch between menus,\n" +
-			                           "Start: Quit the game\n" +
-			                           "\n[Game]\n" +
-			                           "Left Stick / (OSX)DPad: Move through cards / Move on board\n" +
-			                           "\nA: Accept / Play\n" +
-			                           "B: Cancel\n" +
-			                           "X: Cycle through recently played scrolls\n" +
-			                           "Y: End turn\n" +
-			                           "\nLT + A: Sacrifice for Growth\n" +
-			                           "LT + X: Sacrifice for Order\n" +
-			                           "LT + Y: Sacrifice for Energy\n" +
-			                           "LT + B: Sacrifce for Scrolls\n" +
-			                           "RT: Magnify selected Scroll\n" +
-			                           "\nLeft Stick Click: Take control of board\n" +
-			                           "Right Stick Click: Toggle show stats\n" +
-			                           "\nBack: Show chat\n" +
-			                           "Back + A: \'Hello and good luck.\'\n" +
-			                           "Back + B: \'Good Game.\'\n" +
-			                           "Back + X: \'Nice play!\'\n" +
-			                           "Back + Y: \':)\'\n"
-			                          , "Ok");
+			if (OsSpec.getOS () == OSType.OSX) {
+				App.Popups.ShowScrollText (this, "control_scheme", "Controls", 
+				                           "[Main Menu]\n" +
+				                           "Left Stick or DPad: Move\n" +
+				                           "A: Accept\n" +
+				                           "B: Cancel\n" +
+				                           "Y: View match invite\n" +
+				                           "LT and RT: Switch between menus,\n" +
+				                           "Start: Quit the game\n" +
+				                           "\n[Game]\n" +
+				                           "Left Stick or DPad: Move through cards / Move on board\n" +
+				                           "\nA: Accept / Play\n" +
+				                           "B: Cancel\n" +
+				                           "X: Cycle through recently played scrolls\n" +
+				                           "Y: End turn\n" +
+				                           "\nLT + A: Sacrifice for Growth\n" +
+				                           "LT + X: Sacrifice for Order\n" +
+				                           "LT + Y: Sacrifice for Energy\n" +
+				                           "LT + B: Sacrifce for Scrolls\n" +
+				                           "RT: Magnify selected Scroll\n" +
+				                           "\nLeft Stick Click: Take control of board\n" +
+				                           "Right Stick Click: Toggle show stats\n" +
+				                           "\nBack: Show chat\n" +
+				                           "Back + A: \'Hello and good luck.\'\n" +
+				                           "Back + B: \'Good Game.\'\n" +
+				                           "Back + X: \'Nice play!\'\n" +
+				                           "Back + Y: \':)\'\n"
+				                           , "Ok");
+			} else {
+				App.Popups.ShowScrollText (this, "control_scheme", "Controls", 
+				                           "[Main Menu]\n" +
+				                           "Left Stick: Move\n" +
+				                           "A: Accept\n" +
+				                           "B: Cancel\n" +
+				                           "Y: View match invite\n" +
+				                           "LT/RT: Switch between menus,\n" +
+				                           "Start: Quit the game\n" +
+				                           "\n[Game]\n" +
+				                           "Left Stick: Move through cards / Move on board\n" +
+				                           "\nA: Accept / Play\n" +
+				                           "B: Cancel\n" +
+				                           "X: Cycle through recently played scrolls\n" +
+				                           "Y: End turn\n" +
+				                           "\nLT + A: Sacrifice for Growth\n" +
+				                           "LT + X: Sacrifice for Order\n" +
+				                           "LT + Y: Sacrifice for Energy\n" +
+				                           "LT + B: Sacrifce for Scrolls\n" +
+				                           "RT: Magnify selected Scroll\n" +
+				                           "\nLeft Stick Click: Take control of board\n" +
+				                           "Right Stick Click: Toggle show stats\n" +
+				                           "\nBack: Show chat\n" +
+				                           "Back + A: \'Hello and good luck.\'\n" +
+				                           "Back + B: \'Good Game.\'\n" +
+				                           "Back + X: \'Nice play!\'\n" +
+				                           "Back + Y: \':)\'\n"
+				                           , "Ok");
+			}
 		}
 	}
 }

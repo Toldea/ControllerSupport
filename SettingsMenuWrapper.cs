@@ -44,8 +44,7 @@ namespace ControllerSupport {
 			// OSX only Xbox or PS3 controller choice setting.
 			if (osType == OSType.OSX) {
 				height -= .02f;
-				
-				GUI.skin.label.fontSize = fontSize;
+
 				TextAnchor alignment = GUI.skin.label.alignment;
 				GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 				GUI.skin.label.fontSize = Screen.height / 40;
@@ -82,6 +81,8 @@ namespace ControllerSupport {
 				App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
 				configGUI.ShowControlScheme ();
 			}
+
+			GUI.skin.label.fontSize = fontSize;
 		}
 	}
 }
