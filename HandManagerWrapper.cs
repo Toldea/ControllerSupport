@@ -11,7 +11,6 @@ namespace ControllerSupport {
 		private bool nextCardReserved = false;
 
 		public HandManagerWrapper (HandManager handManager){
-			Console.WriteLine ("ControllerSupport: Creating HandManager Wrapper.");
 			Initialize (handManager);
 		}
 
@@ -92,26 +91,31 @@ namespace ControllerSupport {
 		public void UseActiveCard(string action, ResourceType[] resTypes = null) {
 			CardActivator cardActivator = (CardActivator)typeof(HandManager).GetField ("cardActivator", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (handManager);
 			if (cardActivator != null) {
-				// Safe the next card id while we still have our card in hand.
-				long nextCardID = GetNextCard (1);
+				bool allowAction = true;
+				if (action == "growth" || action == "order" || action == "energy") {
+					allowAction = CanSacrificeForResource (action, resTypes);
+				}
+				if (allowAction) {
+					// Try to reserve the next card.
+					ReserveNextCard ();
+					// Use the currently active card.
+					cardActivator.GetType ().GetMethod ("iconClicked", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (cardActivator, new object[] { action });
+				}
+			}
+		}
+
+		public void ReserveNextCard () {
+			// Safe the next card id while we still have our card in hand.
+			long nextCardID = GetNextCard (1);
+			// Make sure it is valid.
+			if (nextCardID != -1L) {
 				// Safety check to see if the next card id still is the same card (aka we only have 1 card in hand).
 				if (nextCardID == GetCardViewById (activeCardID).getCardInfo ().getId ()) {
 					nextCardID = -1L;
 				} else {
 					// Reserve the next card, so it gets selected the next time the user attempts to move through his scrolls.
 					nextCardReserved = true;
-				}
-				bool allowAction = true;
-				if (action == "growth" || action == "order" || action == "energy") {
-					allowAction = CanSacrificeForResource (action, resTypes);
-				}
-				if (allowAction) {
-					// Use the currently active card.
-					cardActivator.GetType ().GetMethod ("iconClicked", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (cardActivator, new object[] { action });
-					// If available set the next card as active.
-					if (nextCardID != -1L) {
-						activeCardID = nextCardID;
-					}
+					activeCardID = nextCardID;
 				}
 			}
 		}

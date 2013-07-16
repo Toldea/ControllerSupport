@@ -16,7 +16,6 @@ namespace ControllerSupport {
 				} else {
 					App.Popups.ShowOk(null, "new_install", "Welcome to ControllerSupport", "First time?", "Ok");
 				}
-
 			} else if (configManager.IsNewVersion (version)) {
 				Console.WriteLine ("ControllerSupport: ConfigManager: New version detected!");
 			} else {

@@ -19,7 +19,6 @@ namespace ControllerSupport {
 		private float viewingCardTimeStamp = -1000f;
 
 		public BattleModeWrapper (BattleMode battleMode) {
-			Console.WriteLine ("ControllerSupport: Creating BattleMode Wrapper.");
 			Initialize (battleMode);
 		}
 
@@ -99,7 +98,9 @@ namespace ControllerSupport {
 		}
 
 		public void CardClicked(CardView cardView, int mouseButton) {
-			cardClickedMethodInfo.Invoke (battleMode, new object[] { cardView, mouseButton });
+			if (cardView != null) {
+				cardClickedMethodInfo.Invoke (battleMode, new object[] { cardView, mouseButton });
+			}
 		}
 
 		public ResourceType[] GetResourceTypes() {
@@ -199,7 +200,7 @@ namespace ControllerSupport {
 			if (tileRow > 4) tileRow = 4;
 		}
 
-		public void TileClicked () {
+		public void TileClicked (HandManagerWrapper handManagerWrapper) {
 			Tile tile = GetTile ();
 			if (tile != null) {
 				// Get the list of all valid tiles to do the currently active ability on (play scroll, move, etc.).
@@ -240,6 +241,10 @@ namespace ControllerSupport {
 							}
 						}
 					}
+				}
+				// Reserve the next card if we will place a unit on the board with this click.
+				if (didPlaceUnit) {
+					handManagerWrapper.ReserveNextCard ();
 				}
 				// 'Click' on the currently highlighted tile if we didn't activate a unit's activated ability.
 				if (!didActivateAbility) {

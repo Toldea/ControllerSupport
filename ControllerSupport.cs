@@ -434,10 +434,12 @@ namespace ControllerSupport
 
 			switch (inputType) {
 			case "EndTurn":
-				battleMode.EndTurnPressed ();
-				// Always take control over the hand again on end turn.
-				if (controlBoard) {
-					battleMode.TakeControlOfHand ();
+				if (!battleMode.TurnEnded ()) {
+					battleMode.EndTurnPressed ();
+					// Always take control over the hand again on end turn.
+					if (controlBoard) {
+						battleMode.TakeControlOfHand ();
+					}
 				}
 				break;
 			
@@ -457,13 +459,14 @@ namespace ControllerSupport
 							} else if (handManager.IsSelectedCardPlayableOnBoard ()) { // Check if the scroll is playable on board.
 								battleMode.TakeControlOfBoard ();
 							}
+						} else {
+							// Select the currently active card.
+							//Console.WriteLine ("ControllerSupport: HandleBattleModeInput: Controlling hand, calling battleMode.CardClicked!");
+							//battleMode.CardClicked (handManager.GetActiveCard (), 0);
 						}
-					} else {
-						// Select the currently active card.
-						battleMode.CardClicked (handManager.GetActiveCard (), 0);
-					}
+					} 
 				} else if (controlBoard) {
-					battleMode.TileClicked ();
+					battleMode.TileClicked (handManager);
 				}
 				break;
 			case "Cancel":
