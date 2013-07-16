@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using UnityEngine;
 
 namespace ControllerSupport {
 	public class GUIBattleModeMenuWrapper {
@@ -7,6 +8,9 @@ namespace ControllerSupport {
 		private MethodInfo upMethodInfo;
 		private MethodInfo downMethodInfo;
 		public GUIBattleModeMenuWrapper (GUIBattleModeMenu battleModeMenu) {
+			Initialize (battleModeMenu);
+		}
+		public void Initialize(GUIBattleModeMenu battleModeMenu) {
 			this.battleModeMenu = battleModeMenu;
 			upMethodInfo = battleModeMenu.GetType ().GetMethod ("up", BindingFlags.NonPublic | BindingFlags.Instance);
 			downMethodInfo = battleModeMenu.GetType ().GetMethod ("down", BindingFlags.NonPublic | BindingFlags.Instance);

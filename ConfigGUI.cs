@@ -14,7 +14,7 @@ namespace ControllerSupport {
 				if (OsSpec.getOS () == OSType.OSX) {
 					App.Popups.ShowOkCancel (this, "choose_controller", "Welcome to ControllerSupport", "What Controller would you like to use?", "Xbox 360", "PS3");
 				} else {
-					App.Popups.ShowOk(null, "new_install", "Welcome to ControllerSupport", "First time?", "Ok");
+					App.Popups.ShowOk(null, "new_install", "Welcome to ControllerSupport", "This mod supports Xbox 360 controllers natively and PS3 controlls through MotionJoy (set to Xbox emulator mode).", "Controls");
 				}
 			} else if (configManager.IsNewVersion (version)) {
 				Console.WriteLine ("ControllerSupport: ConfigManager: New version detected!");

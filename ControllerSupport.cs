@@ -73,7 +73,9 @@ namespace ControllerSupport
 					handManager = new HandManagerWrapper (battleMode.GetHandManager ());
 					battleModeMenu = new GUIBattleModeMenuWrapper (battleMode.GetMenu());
 				}
-				battleMode.Validate ((BattleMode)info.target);
+				if (battleMode.Validate ((BattleMode)info.target)) {
+					battleModeMenu.Initialize (battleMode.GetMenu ());
+				}
 				handManager.Validate (battleMode.GetHandManager ());
 				HandleBattleModeControls ();
 				HandleBattleModeMenuControls ();
@@ -134,7 +136,8 @@ namespace ControllerSupport
 						referenceTile.renderer.material.color = new Color(.3f, 1f, .3f, .6f);
 					}
 				}
-			}*/ else if (info.target.GetType () == typeof(SettingsMenu) && info.targetMethod.Equals ("OnGUI")) {
+			}*/
+			else if (info.target.GetType () == typeof(SettingsMenu) && info.targetMethod.Equals ("OnGUI")) {
 				if (settingsMenu == null) {
 					settingsMenu = new SettingsMenuWrapper ((SettingsMenu)info.target, configManager, configGUI);
 				}
