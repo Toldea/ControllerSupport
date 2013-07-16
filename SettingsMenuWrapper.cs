@@ -11,13 +11,13 @@ namespace ControllerSupport {
 		private OSType osType;
 		private bool usePS3;
 
-		public SettingsMenuWrapper (SettingsMenu settingsMenu, ConfigManager configManager, ConfigGUI configGUI) {
+		public SettingsMenuWrapper (ConfigManager configManager, ConfigGUI configGUI) {
 			this.configManager = configManager;
 			this.configGUI = configGUI;
 			usePS3 = configManager.UsingPS3 ();
 			osType = OsSpec.getOS ();
-			settingsSkin = (GUISkin)typeof(SettingsMenu).GetField ("settingsSkin", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (settingsMenu);
-			regularUI = (GUISkin)typeof(SettingsMenu).GetField ("regularUI", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (settingsMenu);
+			settingsSkin = (GUISkin)Resources.Load ("_GUISkins/Settings");
+			regularUI = (GUISkin)Resources.Load ("_GUISkins/RegularUI");
 		}
 
 		public void OnGUI() {

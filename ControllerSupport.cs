@@ -51,6 +51,7 @@ namespace ControllerSupport
 			try {
 				return new MethodDefinition[] { 
 					scrollsTypes["BattleMode"].Methods.GetMethod("handleInput")[0],
+					scrollsTypes["BattleMode"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["EndGameScreen"].Methods.GetMethod("OnGUI")[0],
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("Update")[0],
 					scrollsTypes["LobbyMenu"].Methods.GetMethod("OnGUI")[0],
@@ -139,9 +140,16 @@ namespace ControllerSupport
 			}*/
 			else if (info.target.GetType () == typeof(SettingsMenu) && info.targetMethod.Equals ("OnGUI")) {
 				if (settingsMenu == null) {
-					settingsMenu = new SettingsMenuWrapper ((SettingsMenu)info.target, configManager, configGUI);
+					settingsMenu = new SettingsMenuWrapper (configManager, configGUI);
 				}
 				if (lobbyMenu.GetCurrentSceneName () == "_Settings") {
+					settingsMenu.OnGUI ();
+				}
+			} else if (info.target.GetType () == typeof(BattleMode) && info.targetMethod.Equals ("OnGUI")) {
+				if (battleMode.ShowingMenu ()) {
+					if (settingsMenu == null) {
+						settingsMenu = new SettingsMenuWrapper (configManager, configGUI);
+					}
 					settingsMenu.OnGUI ();
 				}
 			}
