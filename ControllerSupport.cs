@@ -146,7 +146,7 @@ namespace ControllerSupport
 					settingsMenu.OnGUI ();
 				}
 			} else if (info.target.GetType () == typeof(BattleMode) && info.targetMethod.Equals ("OnGUI")) {
-				if (battleMode.ShowingMenu ()) {
+				if (battleMode.ShowingMenu () && battleModeMenu.GetMenuState() != GUIBattleModeMenuWrapper.EMenuState.HELP) {
 					if (settingsMenu == null) {
 						settingsMenu = new SettingsMenuWrapper (configManager, configGUI);
 					}

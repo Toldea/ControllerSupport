@@ -32,6 +32,18 @@ namespace ControllerSupport {
 				break;
 			}
 		}
+
+		public EMenuState GetMenuState() {
+			return (EMenuState)typeof(GUIBattleModeMenu).GetField ("menuState", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleModeMenu);
+		}
+
+		public enum EMenuState {
+			NONE,
+			MAIN,
+			QUIT,
+			HELP,
+			SETTINGS
+		}
 	}
 }
 
