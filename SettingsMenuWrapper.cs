@@ -7,11 +7,13 @@ namespace ControllerSupport {
 		private GUISkin settingsSkin;
 		private GUISkin regularUI;
 		private ConfigManager configManager;
+		private ConfigGUI configGUI;
 		private OSType osType;
 		private bool usePS3;
 
-		public SettingsMenuWrapper (SettingsMenu settingsMenu, ConfigManager configManager) {
+		public SettingsMenuWrapper (SettingsMenu settingsMenu, ConfigManager configManager, ConfigGUI configGUI) {
 			this.configManager = configManager;
+			this.configGUI = configGUI;
 			usePS3 = configManager.UsingPS3 ();
 			osType = OsSpec.getOS ();
 			settingsSkin = (GUISkin)typeof(SettingsMenu).GetField ("settingsSkin", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (settingsMenu);
@@ -23,7 +25,8 @@ namespace ControllerSupport {
 			GUI.skin = settingsSkin;
 
 			// Background frame.
-			Rect rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.25f, (float)Screen.height * 0.7f, (float)Screen.height * 0.5f, (float)Screen.height * 0.2f);
+			//Rect rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.25f, (float)Screen.height * 0.7f, (float)Screen.height * 0.5f, (float)Screen.height * 0.2f);
+			Rect rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.25f, (float)Screen.height * 0.65f, (float)Screen.height * 0.5f, (float)Screen.height * 0.2f);
 			new ScrollsFrame (rect).AddNinePatch (ScrollsFrame.Border.DARK_CURVED, NinePatch.Patches.CENTER).Draw ();
 
 			// Header
@@ -77,6 +80,7 @@ namespace ControllerSupport {
 			GUI.skin.button.fontSize = Screen.height / 36;
 			if (GUI.Button (new Rect (num - (float)Screen.height * 0.1f, rect.y + (float)Screen.height * height, (float)Screen.height * 0.2f, (float)Screen.height * 0.05f), "View Controls")) {
 				App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
+				configGUI.ShowControlScheme ();
 			}
 		}
 	}

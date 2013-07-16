@@ -136,7 +136,7 @@ namespace ControllerSupport
 				}
 			}*/ else if (info.target.GetType () == typeof(SettingsMenu) && info.targetMethod.Equals ("OnGUI")) {
 				if (settingsMenu == null) {
-					settingsMenu = new SettingsMenuWrapper ((SettingsMenu)info.target, configManager);
+					settingsMenu = new SettingsMenuWrapper ((SettingsMenu)info.target, configManager, configGUI);
 				}
 				if (lobbyMenu.GetCurrentSceneName () == "_Settings") {
 					settingsMenu.OnGUI ();

@@ -37,7 +37,7 @@ namespace ControllerSupport {
 		}
 		public void PopupOk(String type, String choice) {}
 
-		private void ShowControlScheme() {
+		public void ShowControlScheme() {
 			App.Popups.ShowScrollText (this, "control_scheme", "Controls", 
 			                           "[Main Menu]\n" +
 			                           "Left Stick / (OSX)DPad: Move\n" +
