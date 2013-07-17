@@ -273,7 +273,8 @@ namespace ControllerSupport {
 			switch (inputType) {
 			case "Accept":
 				if (currentPopupType == PopupType.OK || currentPopupType == PopupType.SCROLL_TEXT) {
-					CancelPopup ();
+					//CancelPopup ();
+					AcceptPopup ();
 				} else if (currentPopupType == PopupType.OK_CANCEL) {
 					if (selectedIndex == 0) {
 						AcceptPopup ();
@@ -316,8 +317,11 @@ namespace ControllerSupport {
 			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
 			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
 			HidePopupMethodInfo.Invoke (popups, new object[] { });
-			string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-			((IOkCallback)typeof(Popups).GetField ("okCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups)).PopupOk(popupType);
+			IOkCallback callback = ((IOkCallback)typeof(Popups).GetField ("okCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups));
+			if (callback != null) {
+				string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				callback.PopupOk(popupType);
+			}
 		}
 		private void AcceptMultibuttonPopup() {
 			if (selectedIndex < 0) { 
@@ -330,8 +334,11 @@ namespace ControllerSupport {
 			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
 			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
 			HidePopupMethodInfo.Invoke (popups, new object[] { });
-			string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-			((IOkStringCallback)typeof(Popups).GetField ("okStringCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups)).PopupOk(popupType, buttonList[selectedIndex]);
+			IOkStringCallback callback = ((IOkStringCallback)typeof(Popups).GetField ("okStringCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups));
+			if (callback != null) {
+				string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				callback.PopupOk(popupType, buttonList[selectedIndex]);
+			}
 		}
 		private void AcceptDeckSelectorPopup () {
 			HidePopupMethodInfo.Invoke (popups, new object[] { });
@@ -354,8 +361,12 @@ namespace ControllerSupport {
 				}
 				return a.name.CompareTo (b.name);
 			});
-			DeckInfo deckInfo = deckList[selectedIndex];
-			((IDeckCallback)typeof(Popups).GetField ("deckChosenCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups)).PopupDeckChosen(deckInfo);
+
+			IDeckCallback callback = ((IDeckCallback)typeof(Popups).GetField ("deckChosenCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups));
+			if (callback != null) {
+				DeckInfo deckInfo = deckList[selectedIndex];
+				callback.PopupDeckChosen(deckInfo);
+			}
 		}
 		private void AcceptTowerChallengePopup() {
 			HidePopupMethodInfo.Invoke (popups, new object[] { });
@@ -367,8 +378,12 @@ namespace ControllerSupport {
 			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
 			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
 			HidePopupMethodInfo.Invoke (popups, new object[] { });
-			string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-			((ICancelCallback)typeof(Popups).GetField ("cancelCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups)).PopupCancel(popupType);
+
+			ICancelCallback callback = ((ICancelCallback)typeof(Popups).GetField ("cancelCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups));
+			if (callback != null) {
+				string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				callback.PopupCancel(popupType);
+			}
 		}
 
 		private void MoveSelectionIndicator(Movement movement) {
