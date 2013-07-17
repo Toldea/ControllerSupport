@@ -25,7 +25,6 @@ namespace ControllerSupport {
 			GUI.skin = settingsSkin;
 
 			// Background frame.
-			//Rect rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.25f, (float)Screen.height * 0.7f, (float)Screen.height * 0.5f, (float)Screen.height * 0.2f);
 			Rect rect = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.25f, (float)Screen.height * 0.65f, (float)Screen.height * 0.5f, (float)Screen.height * 0.2f);
 			new ScrollsFrame (rect).AddNinePatch (ScrollsFrame.Border.DARK_CURVED, NinePatch.Patches.CENTER).Draw ();
 

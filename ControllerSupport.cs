@@ -157,6 +157,30 @@ namespace ControllerSupport
 		}
 
 		private void HandleBattleModeControls() {
+			// Chat commands (done here so we can chat when the endGameScreen is active.
+			if (Input.GetKey (controllerBindings.BACK)) {
+				if (Input.GetKeyUp (controllerBindings.A)) {
+					battleMode.SendChatMessage ("Hello and good luck.");
+					return;
+				}
+				if (Input.GetKeyUp (controllerBindings.B)) {
+					battleMode.SendChatMessage ("Good Game.");
+					return;
+				}
+				if (Input.GetKeyUp (controllerBindings.X)) {
+					battleMode.SendChatMessage ("Nice play!");
+					return;
+				}
+				if (Input.GetKeyUp (controllerBindings.Y)) {
+					battleMode.SendChatMessage (":)");
+					return;
+				}
+			} else if (Input.GetKeyUp (controllerBindings.BACK)) {
+				// Reshow the chat
+				battleMode.ShowChat ();
+				return;
+			}
+
 			// If the end screen is linked and it 'active', disable battle mode controls.
 			if (endGameScreen.isActive ()) {
 				return;
@@ -194,19 +218,6 @@ namespace ControllerSupport
 						HandleBattleModeInput ("Cycle");
 					}
 				}
-			} else if (Input.GetKey (controllerBindings.BACK)) {
-				if (Input.GetKeyUp (controllerBindings.A)) {
-					battleMode.SendChatMessage ("Hello and good luck.");
-				}
-				if (Input.GetKeyUp (controllerBindings.B)) {
-					battleMode.SendChatMessage ("Good Game.");
-				}
-				if (Input.GetKeyUp (controllerBindings.X)) {
-					battleMode.SendChatMessage ("Nice play!");
-				}
-				if (Input.GetKeyUp (controllerBindings.Y)) {
-					battleMode.SendChatMessage (":)");
-				}
 			} else {
 				// End Turn
 				if (Input.GetKeyUp (controllerBindings.Y)) {
@@ -231,10 +242,6 @@ namespace ControllerSupport
 				// Cycle through played cards
 				if (Input.GetKeyUp(controllerBindings.X)) {
 					battleMode.CycleShowRecentlyPlayedCards ();
-				}
-				// Reshow the chat
-				if (Input.GetKeyUp (controllerBindings.BACK)) {
-					battleMode.ShowChat ();
 				}
 				// Right
 				if (battleModeAxisDeltaTime > axisDelay && Input.GetAxis (controllerBindings.LEFT_STICK_HORIZONTAL_AXIS) > .5f) {
@@ -291,6 +298,9 @@ namespace ControllerSupport
 			// Check to see if the end screen is already 'inited'.
 			// This because the object itself is created at the start of the battle, and otherwise we would be able to instantly end the game.
 			if (endGameScreen.isActive ()) {
+				// Set the lobbyMenu back to the lobby screen, as the game will always put you back there after a game.
+				lobbyMenu.SetCurrentScene ("_Lobby");
+
 				if (Input.GetKeyDown (controllerBindings.A)) {
 					endGameScreen.ExitScreen ();
 				}

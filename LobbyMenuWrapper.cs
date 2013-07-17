@@ -245,6 +245,10 @@ namespace ControllerSupport {
 			}
 		}
 
+		public void SetCurrentScene(string sceneName) {
+			lastScene = sceneName;
+		}
+
 		private string GetNextScene(string currentSceneName) {
 			int index = GetCurrentSceneIndex (currentSceneName);
 			if (index < 0) {

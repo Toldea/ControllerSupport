@@ -13,9 +13,9 @@ namespace ControllerSupport {
 
 			if (configManager.IsNewInstall ()) {
 				if (OsSpec.getOS () == OSType.OSX) {
-					App.Popups.ShowOkCancel (this, "choose_controller", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n(Other screens coming soon!)\n\nWhat Controller would you like to use?", "Xbox 360", "PS3");
+					App.Popups.ShowOkCancel (this, "choose_controller", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n(Other screens coming soon!)\n\nThis mod support PS3 controllers on OSX natively and Xbox 360 controllers with the Taggiebogle driver.\n\nWhat Controller would you like to use?", "Xbox 360", "PS3");
 				} else {
-					App.Popups.ShowOk(null, "new_install", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n(Other screens coming soon!)\n\nThis mod supports Xbox 360 controllers natively and PS3 controlls through MotionJoy (set to Xbox emulator mode).", "Controls");
+					App.Popups.ShowOk(this, "new_install", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n(Other screens coming soon!)\n\nThis mod supports Xbox 360 controllers natively and PS3 controlls through MotionJoy (set to Xbox emulator mode).", "Controls");
 				}
 			} else if (configManager.IsNewVersion (version)) {
 				Console.WriteLine ("ControllerSupport: ConfigManager: New version detected!");
@@ -28,11 +28,15 @@ namespace ControllerSupport {
 			if (type == "choose_controller") {
 				configManager.SetUsePS3 (true);
 				ShowControlScheme ();
+			} else if (type == "new_install") {
+				ShowControlScheme ();
 			}
 		}
 		public void PopupOk(String type) {
 			if (type == "choose_controller") {
 				configManager.SetUsePS3 (false);
+				ShowControlScheme ();
+			} else if (type == "new_install") {
 				ShowControlScheme ();
 			}
 		}
