@@ -16,7 +16,6 @@ namespace ControllerSupport {
 
 		public void Validate (HandManager handManager) {
 			if (this.handManager == null) {
-				Console.WriteLine ("ControllerSupport: HandManagerWrapper.Validate: HandManager is invalid, reinitializing..");
 				Initialize (handManager);
 			}
 		}
@@ -83,6 +82,7 @@ namespace ControllerSupport {
 			// If a magnifiedCard already exists, destroy it. Else check if we have a valid selected card and then magnify it.
 			if (magnifiedCard != null ) {
 				handManager.GetType ().GetMethod ("DestroyMagnified", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (handManager, new object[] {});
+				handManager.DeselectCard ();
 			} else if (handManager.GetSelectedCard () != null) {
 				handManager.MagnifySelected ();
 			}

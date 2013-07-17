@@ -10,6 +10,7 @@ namespace ControllerSupport {
 		private ConfigGUI configGUI;
 		private OSType osType;
 		private bool usePS3;
+		private bool buttonHighlighted;
 
 		public SettingsMenuWrapper (ConfigManager configManager, ConfigGUI configGUI) {
 			this.configManager = configManager;
@@ -20,7 +21,20 @@ namespace ControllerSupport {
 			regularUI = (GUISkin)Resources.Load ("_GUISkins/RegularUI");
 		}
 
-		public void OnGUI() {
+		public void HandleInput(string inputType) {
+			if (inputType == "Accept" && buttonHighlighted) {
+				ShowControlScheme ();
+			}
+		}
+
+		private void ShowControlScheme() {
+			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
+			configGUI.ShowControlScheme ();
+		}
+
+		public void OnGUI(bool drawHighlight) {
+			buttonHighlighted = drawHighlight;
+
 			GUI.depth = 21;
 			GUI.skin = settingsSkin;
 
@@ -76,11 +90,16 @@ namespace ControllerSupport {
 
 			int fontSize2 = GUI.skin.button.fontSize;
 			GUI.skin.button.fontSize = Screen.height / 36;
+			Texture2D background = GUI.skin.button.normal.background;
+
+			if (buttonHighlighted) {
+				GUI.skin.button.normal.background = GUI.skin.button.hover.background;
+			}
 			if (GUI.Button (new Rect (num - (float)Screen.height * 0.1f, rect.y + (float)Screen.height * height, (float)Screen.height * 0.2f, (float)Screen.height * 0.05f), "View Controls")) {
-				App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
-				configGUI.ShowControlScheme ();
+				ShowControlScheme ();
 			}
 
+			GUI.skin.button.normal.background = background;
 			GUI.skin.label.fontSize = fontSize;
 		}
 	}

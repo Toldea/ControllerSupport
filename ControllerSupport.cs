@@ -32,6 +32,7 @@ namespace ControllerSupport
 			controllerBindings = new ControllerKeyBindings ();
 			configManager = new ConfigManager (this.OwnFolder (), controllerBindings);
 			controllerBindings.SetUsePS3 (configManager.UsingPS3 ());
+			popups = new PopupsWrapper (App.Popups);
 		}
 
 		private void ShowConfigGUI() {
@@ -74,12 +75,23 @@ namespace ControllerSupport
 					handManager = new HandManagerWrapper (battleMode.GetHandManager ());
 					battleModeMenu = new GUIBattleModeMenuWrapper (battleMode.GetMenu());
 				}
+				if (settingsMenu == null) {
+					settingsMenu = new SettingsMenuWrapper (configManager, configGUI);
+				}
 				if (battleMode.Validate ((BattleMode)info.target)) {
 					battleModeMenu.Initialize (battleMode.GetMenu ());
 				}
 				handManager.Validate (battleMode.GetHandManager ());
-				HandleBattleModeControls ();
-				HandleBattleModeMenuControls ();
+
+				if (popups.IsShowingPopup ()) {
+					HandlePopupsControls ();
+				} else {
+					HandleBattleModeControls ();
+					if (battleMode.ShowingMenu()) {
+						HandleSettingsMenuControls ();
+						HandleBattleModeMenuControls ();
+					}
+				}
 				// Cache the currently selected tile (used to display a custom tinted hover indicator).
 				//if (battleMode.InControlOfBoard ()) {
 				//	selectedTile = battleMode.GetTile ();
@@ -97,14 +109,14 @@ namespace ControllerSupport
 						ShowConfigGUI ();
 					}
 				}
-				if (popups == null) {
-					popups = new PopupsWrapper (App.Popups);
-				}
 				// Let popups leech of LobbyMenu's update function.
 				if (popups.IsShowingPopup ()) {
 					HandlePopupsControls ();
 				} else {
 					HandleLobbyMenuControls ();
+					if (lobbyMenu.GetCurrentSceneName () == "_Settings") {
+						HandleSettingsMenuControls ();
+					}
 				}
 			} else if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("fadeOutScene")) {
 				if (lobbyMenu == null) {
@@ -124,9 +136,6 @@ namespace ControllerSupport
 			if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("OnGUI")) {
 				lobbyMenu.OnGUI ();
 			} else if (info.target.GetType () == typeof(Popups) && info.targetMethod.Equals ("OnGUI")) {
-				if (popups == null) {
-					popups = new PopupsWrapper (App.Popups);
-				}
 				popups.OnGUI ();
 			}/* else if (info.target.GetType () == typeof(Tile) && info.targetMethod.Equals ("FixedUpdate")) {
 				// Custom, more clearly visable tile hover color.
@@ -143,44 +152,23 @@ namespace ControllerSupport
 					settingsMenu = new SettingsMenuWrapper (configManager, configGUI);
 				}
 				if (lobbyMenu.GetCurrentSceneName () == "_Settings") {
-					settingsMenu.OnGUI ();
+					settingsMenu.OnGUI (true);
 				}
 			} else if (info.target.GetType () == typeof(BattleMode) && info.targetMethod.Equals ("OnGUI")) {
 				if (battleMode.ShowingMenu () && battleModeMenu.GetMenuState() != GUIBattleModeMenuWrapper.EMenuState.HELP) {
 					if (settingsMenu == null) {
 						settingsMenu = new SettingsMenuWrapper (configManager, configGUI);
 					}
-					settingsMenu.OnGUI ();
+					if (!popups.IsShowingPopup ()) {
+						bool drawHighlight = (battleModeMenu.GetMenuState() == GUIBattleModeMenuWrapper.EMenuState.CONTROL_SCHEME);
+						settingsMenu.OnGUI (drawHighlight);
+					}
 				}
 			}
 			return;
 		}
 
 		private void HandleBattleModeControls() {
-			// Chat commands (done here so we can chat when the endGameScreen is active.
-			if (Input.GetKey (controllerBindings.BACK)) {
-				if (Input.GetKeyUp (controllerBindings.A)) {
-					battleMode.SendChatMessage ("Hello and good luck.");
-					return;
-				}
-				if (Input.GetKeyUp (controllerBindings.B)) {
-					battleMode.SendChatMessage ("Good Game.");
-					return;
-				}
-				if (Input.GetKeyUp (controllerBindings.X)) {
-					battleMode.SendChatMessage ("Nice play!");
-					return;
-				}
-				if (Input.GetKeyUp (controllerBindings.Y)) {
-					battleMode.SendChatMessage (":)");
-					return;
-				}
-			} else if (Input.GetKeyUp (controllerBindings.BACK)) {
-				// Reshow the chat
-				battleMode.ShowChat ();
-				return;
-			}
-
 			// If the end screen is linked and it 'active', disable battle mode controls.
 			if (endGameScreen.isActive ()) {
 				return;
@@ -218,10 +206,27 @@ namespace ControllerSupport
 						HandleBattleModeInput ("Cycle");
 					}
 				}
+			} else if (Input.GetKey (controllerBindings.BACK)) {
+				if (Input.GetKeyUp (controllerBindings.A)) {
+					battleMode.SendChatMessage ("Hello and good luck.");
+				}
+				if (Input.GetKeyUp (controllerBindings.B)) {
+					battleMode.SendChatMessage ("Good Game.");
+				}
+				if (Input.GetKeyUp (controllerBindings.X)) {
+					battleMode.SendChatMessage ("Nice play!");
+				}
+				if (Input.GetKeyUp (controllerBindings.Y)) {
+					battleMode.SendChatMessage (":)");
+				}
 			} else {
 				// End Turn
 				if (Input.GetKeyUp (controllerBindings.Y)) {
 					HandleBattleModeInput ("EndTurn");
+				}
+				// Reshow the chat
+				if (Input.GetKeyUp (controllerBindings.BACK)) {
+					battleMode.ShowChat ();
 				}
 				// Toggle Show Stats
 				if (Input.GetKeyUp (controllerBindings.RIGHT_STICK_CLICK)) {
@@ -449,6 +454,12 @@ namespace ControllerSupport
 			}
 		}
 
+		private void HandleSettingsMenuControls () {
+			if (Input.GetKeyUp (controllerBindings.A)) {
+				settingsMenu.HandleInput ("Accept");
+			}
+		}
+
 		private void HandleBattleModeInput(String inputType) {
 			bool controlBoard = battleMode.InControlOfBoard ();
 			bool controlHand = !controlBoard;
@@ -482,8 +493,7 @@ namespace ControllerSupport
 							}
 						} else {
 							// Select the currently active card.
-							//Console.WriteLine ("ControllerSupport: HandleBattleModeInput: Controlling hand, calling battleMode.CardClicked!");
-							//battleMode.CardClicked (handManager.GetActiveCard (), 0);
+							battleMode.CardClicked (handManager.GetActiveCard (), 0);
 						}
 					} 
 				} else if (controlBoard) {

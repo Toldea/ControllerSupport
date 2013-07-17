@@ -24,7 +24,6 @@ namespace ControllerSupport {
 
 		public bool Validate(BattleMode battleMode) {
 			if (this.battleMode == null || this.handManager == null) {
-				Console.WriteLine ("ControllerSupport: BattleModeWrapper.Validate: BattleMode or HandManager are invalid, reinitializing..");
 				Initialize (battleMode);
 				return true;
 			}

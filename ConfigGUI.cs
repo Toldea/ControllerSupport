@@ -8,9 +8,6 @@ namespace ControllerSupport {
 		public ConfigGUI (ConfigManager configManager, int version) {
 			this.configManager = configManager;
 
-			// TEMP ALWAYS SHOW CONTROLS POPUP AT START!
-			//ShowControlScheme ();
-
 			if (configManager.IsNewInstall ()) {
 				if (OsSpec.getOS () == OSType.OSX) {
 					App.Popups.ShowOkCancel (this, "choose_controller", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n\nThis mod support PS3 controllers on OSX natively and Xbox 360 controllers with the Taggiebogle driver.\n\nWhat Controller would you like to use?\n(Change this or review controls in the Settings or ingame menu)", "Xbox 360", "PS3");
@@ -18,9 +15,9 @@ namespace ControllerSupport {
 					App.Popups.ShowOk(this, "new_install", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n\nThis mod supports Xbox 360 controllers natively and PS3 controllers through MotionJoy (set to Xbox Emulator mode).\n\nReview the controls at any time in the Settings or ingame menu.", "Controls");
 				}
 			} else if (configManager.IsNewVersion (version)) {
-				Console.WriteLine ("ControllerSupport: ConfigManager: New version detected!");
+				//Console.WriteLine ("ControllerSupport: ConfigManager: New version detected!");
 			} else {
-				Console.WriteLine ("ControllerSupport: ConfigManager: Version up to date!");
+				//Console.WriteLine ("ControllerSupport: ConfigManager: Version up to date!");
 			}
 		}
 
