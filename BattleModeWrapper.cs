@@ -209,15 +209,20 @@ namespace ControllerSupport {
 				object tileSelector = ReflectionsManager.GetValue (battleMode, "tileSelector");
 				bool didPlayCard = false;
 				bool didActivateAbility = false;
+				bool didSelectFirstTarget = false;
 
 				// Check if we are trying to play a card from hand on the battlefield (i.e. units / targeted spells / enchantments).
 				if (handManager.GetSelectedCard () != null && tileSelector != null) {
 					if ((bool)ReflectionsManager.GetMethod(tileSelector, "pick").Invoke(tileSelector, new object[] { battleMode.getPosition(tile) })) {
-						if ((bool)ReflectionsManager.GetMethod(tileSelector, "hasPickedAll").Invoke(tileSelector, new object[]{})) {
-							if ((bool)ReflectionsManager.GetMethod(tileSelector, "isValid").Invoke(tileSelector, new object[]{})) {
+						if ((bool)ReflectionsManager.GetMethod (tileSelector, "hasPickedAll").Invoke (tileSelector, new object[] { })) {
+							if ((bool)ReflectionsManager.GetMethod (tileSelector, "isValid").Invoke (tileSelector, new object[] { })) {
 								battleMode.confirmPlayCard (handManager.GetSelectedCard (), (List<TilePosition>)ReflectionsManager.GetValue (tileSelector, "_picked"));
 								didPlayCard = true;
 							}
+						} else {
+							// We haven't picked 'all' needed options (for instance the 2nd target for Flip or Transposition), mark every viable option.
+							ReflectionsManager.GetMethod(battleMode, "markTiles").Invoke(battleMode, new object[]{ReflectionsManager.GetMethod(tileSelector, "getChoiceTiles").Invoke(tileSelector, new object[]{}), Tile.SelectionType.Selected});
+							didSelectFirstTarget = true;
 						}
 					}
 				} else {
@@ -253,7 +258,7 @@ namespace ControllerSupport {
 					handManagerWrapper.ReserveNextCard ();
 				}
 				// 'Click' on the currently highlighted tile if we didn't activate a unit's activated ability.
-				if (!didActivateAbility && !didPlayCard) {
+				if (!didActivateAbility && !didPlayCard && !didSelectFirstTarget) {
 					battleMode.tileClicked(tile);
 				}
 				// Return control back to the hand if we placed a unit.
