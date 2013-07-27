@@ -7,7 +7,7 @@ namespace ControllerSupport {
 	public class LobbyMenuWrapper : IOkCancelCallback, IOkStringCancelCallback {
 		private LobbyMenu lobbyMenu;
 		private MethodInfo fadeOutSceneMethodInfo;
-		private string[] menuSceneNames = new string[] {"_HomeScreen", "_Lobby", "_DeckBuilderView", "_Store", "_Settings", "_Profile"};
+		private string[] menuSceneNames = new string[] {"_HomeScreen", "_Lobby", "_DeckBuilderView", "_CraftingView", "_Store", "_Settings", "_Profile"};
 		private string lastScene = "_HomeScreen";
 		private List<GUISkin> GUISkins;
 		private Vector3 oldMousePosition;

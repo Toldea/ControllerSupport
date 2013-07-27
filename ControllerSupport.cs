@@ -68,7 +68,7 @@ namespace ControllerSupport
 			}
 		}
 
-		public override bool BeforeInvoke(InvocationInfo info, out object returnValue) {
+		public override void BeforeInvoke(InvocationInfo info) {
 			if (info.target.GetType () == typeof(BattleMode) && info.targetMethod.Equals ("handleInput")) {
 				if (info.target.GetType () == typeof(BattleMode) && battleMode == null) {
 					battleMode = new BattleModeWrapper ((BattleMode)info.target);
@@ -129,8 +129,6 @@ namespace ControllerSupport
 				}
 				HandleLoginControls ();
 			}
-			returnValue = null;
-			return false;
 		}
 		public override void AfterInvoke(InvocationInfo info, ref object returnValue) {
 			if (info.target.GetType () == typeof(LobbyMenu) && info.targetMethod.Equals ("OnGUI")) {

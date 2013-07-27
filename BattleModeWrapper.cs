@@ -33,10 +33,11 @@ namespace ControllerSupport {
 		private void Initialize(BattleMode battleMode) {
 			this.battleMode = battleMode;
 			this.handManager = GetHandManager ();
-			cardClickedMethodInfo = battleMode.GetType().GetMethod("cardClicked", BindingFlags.NonPublic | BindingFlags.Instance);
-			toggleUnitStatsMethodInfo = battleMode.GetType().GetMethod("toggleUnitStats", BindingFlags.NonPublic | BindingFlags.Instance);
-			deselectAllTilesMethodInfo = battleMode.GetType ().GetMethod ("deselectAllTiles", BindingFlags.NonPublic | BindingFlags.Instance);
-			gameMenu = (GUIBattleModeMenu)typeof(BattleMode).GetField ("menu", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+
+			cardClickedMethodInfo = ReflectionsManager.GetMethod (battleMode, "cardClicked");
+			toggleUnitStatsMethodInfo = ReflectionsManager.GetMethod (battleMode, "toggleUnitStats");
+			deselectAllTilesMethodInfo = ReflectionsManager.GetMethod (battleMode, "deselectAllTiles");
+			gameMenu = (GUIBattleModeMenu)ReflectionsManager.GetValue (battleMode, "menu");
 			controlBoard = false;
 			tileRow = 2;
 			tileColumn = 1;
@@ -46,8 +47,9 @@ namespace ControllerSupport {
 			// Get a list of all recently played scrolls (both ours and the enemies!).
 			TileColor leftColor = (battleMode.isLeftColor(TileColor.black)) ? TileColor.black : TileColor.white;
 			TileColor rightColor = (leftColor == TileColor.black) ? TileColor.white : TileColor.black;
-			List<Transform> leftSpellList = (List<Transform>)battleMode.GetType().GetMethod("getSpellListFor", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(battleMode, new object[]{leftColor});
-			List<Transform> rightSpellList = (List<Transform>)battleMode.GetType().GetMethod("getSpellListFor", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(battleMode, new object[]{rightColor});
+			MethodInfo getSpellListForMethodInfo = ReflectionsManager.GetMethod (battleMode, "getSpellListFor");
+			List<Transform> leftSpellList = (List<Transform>)getSpellListForMethodInfo.Invoke(battleMode, new object[]{leftColor});
+			List<Transform> rightSpellList = (List<Transform>)getSpellListForMethodInfo.Invoke(battleMode, new object[]{rightColor});
 			List<Transform> spellList = new List<Transform> ();
 			spellList.AddRange (leftSpellList);
 			spellList.AddRange (rightSpellList);
@@ -58,14 +60,14 @@ namespace ControllerSupport {
 			spellList.Sort(delegate(Transform spellObject1, Transform spellObject2) {
 				CardView spell1CardView = spellObject1.GetComponent<CardView> ();
 				CardView spell2CardView = spellObject2.GetComponent<CardView> ();
-				float spell1StartTime = (float)typeof(CardView).GetField ("startTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (spell1CardView);
-				float spell2StartTime = (float)typeof(CardView).GetField ("startTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (spell2CardView);
+				float spell1StartTime = (float)ReflectionsManager.GetValue(spell1CardView, "startTime");
+				float spell2StartTime = (float)ReflectionsManager.GetValue(spell2CardView, "startTime");
 				return (spell2StartTime.CompareTo(spell1StartTime));
 			});
 
 			// Get the timestamp from the most currently played card.
 			CardView lastPlayedCard = spellList[0].GetComponent<CardView>();
-			float newLastPlayedCardTimeStamp = (float)typeof(CardView).GetField ("startTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (lastPlayedCard);
+			float newLastPlayedCardTimeStamp = (float)ReflectionsManager.GetValue (lastPlayedCard, "startTime");
 			int viewingCardIndex = 0;
 			// If we don't have a valid lastPlayedCard time stamp or if a newer card has been played since then, set our currently viewing card stamp to the latest card stamp.
 			if (lastPlayedCardTimeStamp < .0f || lastPlayedCardTimeStamp < newLastPlayedCardTimeStamp) {
@@ -78,7 +80,7 @@ namespace ControllerSupport {
 				for (int i = 1; i < spellList.Count; i++) {
 					// Loop through each spell until we hit one with a time stamp earlier as our viewingCardTimeStamp.
 					CardView cv = spellList [i].GetComponent<CardView>();
-					timeStamp = (float)typeof(CardView).GetField ("startTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (cv);
+					timeStamp = (float)ReflectionsManager.GetValue (cv, "startTime");
 					if (timeStamp < viewingCardTimeStamp) {
 						viewingCardTimeStamp = timeStamp;
 						viewingCardIndex = i;
@@ -94,8 +96,8 @@ namespace ControllerSupport {
 
 			// Select the card we want to view next.
 			CardView cardView = spellList[viewingCardIndex].GetComponent<CardView> ();
-			battleMode.GetType().GetMethod("showCardRule", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(battleMode, new object[]{cardView.getCardInfo()});
-			typeof(BattleMode).GetField ("unitRuleShowing", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleMode, true);
+			ReflectionsManager.GetMethod(battleMode, "showCardRule").Invoke(battleMode, new object[]{cardView.getCardInfo()});
+			ReflectionsManager.SetValue (battleMode, "unitRuleShowing", true);
 		}
 
 		public void CardClicked(CardView cardView, int mouseButton) {
@@ -105,7 +107,7 @@ namespace ControllerSupport {
 		}
 
 		public ResourceType[] GetResourceTypes() {
-			return (ResourceType[])typeof(BattleMode).GetField ("resTypes", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+			return (ResourceType[])ReflectionsManager.GetValue (battleMode, "resTypes");
 		}
 
 		public void EndTurnPressed() {
@@ -129,7 +131,7 @@ namespace ControllerSupport {
 		}
 
 		public HandManager GetHandManager() {
-			return (HandManager)typeof(BattleMode).GetField ("handManager", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+			return (HandManager)ReflectionsManager.GetValue (battleMode, "handManager");
 		}
 
 		public bool InControlOfBoard() {
@@ -173,7 +175,7 @@ namespace ControllerSupport {
 				}
 			} else {
 				// Check if the currently active ability equals 'move', if so limit the board movement to just 'our' side.
-				string activeAbilityId = (string)typeof(BattleMode).GetField ("activeAbilityId", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+				string activeAbilityId = (string)ReflectionsManager.GetValue (battleMode, "activeAbilityId");
 				if (activeAbilityId == "Move") {
 					allowRightBoardMovement = false;
 				}
@@ -204,23 +206,25 @@ namespace ControllerSupport {
 		public void TileClicked (HandManagerWrapper handManagerWrapper) {
 			Tile tile = GetTile ();
 			if (tile != null) {
-				// Get the list of all valid tiles to do the currently active ability on (play scroll, move, etc.).
-				List<List<Tile>> tileSelectionList = new List<List<Tile>> ((List<List<Tile>>)typeof(BattleMode).GetField ("tileSelectionList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode));
-				bool didPlaceUnit = false;
+				object tileSelector = ReflectionsManager.GetValue (battleMode, "tileSelector");
+				bool didPlayCard = false;
 				bool didActivateAbility = false;
+
 				// Check if we are trying to play a card from hand on the battlefield (i.e. units / targeted spells / enchantments).
-				if (handManager.GetSelectedCard () != null) {
-					if (battleMode.isTileInList (tile, tileSelectionList)) {
-						tileSelectionList.RemoveAt (0);
-						if (tileSelectionList.Count == 0) {
-							didPlaceUnit = true;
+				if (handManager.GetSelectedCard () != null && tileSelector != null) {
+					if ((bool)ReflectionsManager.GetMethod(tileSelector, "pick").Invoke(tileSelector, new object[] { battleMode.getPosition(tile) })) {
+						if ((bool)ReflectionsManager.GetMethod(tileSelector, "hasPickedAll").Invoke(tileSelector, new object[]{})) {
+							if ((bool)ReflectionsManager.GetMethod(tileSelector, "isValid").Invoke(tileSelector, new object[]{})) {
+								battleMode.confirmPlayCard (handManager.GetSelectedCard (), (List<TilePosition>)ReflectionsManager.GetValue (tileSelector, "_picked"));
+								didPlayCard = true;
+							}
 						}
 					}
 				} else {
 					// Get the position of the currently active ability and check if it is the same as the currently selected tile.
-					TilePosition activeAbilityPosition = (TilePosition)typeof(BattleMode).GetField ("activeAbilityPosition", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+					TilePosition activeAbilityPosition = (TilePosition)ReflectionsManager.GetValue (battleMode, "activeAbilityPosition");
 					if (activeAbilityPosition.Equals (battleMode.getPosition (tile))) {
-						GameObject cardRule = (GameObject)typeof(BattleMode).GetField ("cardRule", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+						GameObject cardRule = (GameObject)ReflectionsManager.GetValue (battleMode, "cardRule");
 						if (cardRule != null) {
 							CardView cardView = cardRule.GetComponent<CardView> ();
 							if (cardView != null) {
@@ -230,7 +234,7 @@ namespace ControllerSupport {
 									for (int j = 0; j < activeAbilities.Length; j++) {
 										ActiveAbility activeAbility = activeAbilities [j];
 										if (!(activeAbility.name == "Move")) {
-											TilePosition pos = (TilePosition)typeof(CardView).GetField ("pos", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (cardView);
+											TilePosition pos = (TilePosition)ReflectionsManager.GetValue (cardView, "pos");
 											if (pos != null) {
 												battleMode.ActivateTriggeredAbility (activeAbility.id, pos);
 												battleMode.HideCardView ();
@@ -243,16 +247,17 @@ namespace ControllerSupport {
 						}
 					}
 				}
+
 				// Reserve the next card if we will place a unit on the board with this click.
-				if (didPlaceUnit) {
+				if (didPlayCard) {
 					handManagerWrapper.ReserveNextCard ();
 				}
 				// 'Click' on the currently highlighted tile if we didn't activate a unit's activated ability.
-				if (!didActivateAbility) {
+				if (!didActivateAbility && !didPlayCard) {
 					battleMode.tileClicked(tile);
 				}
 				// Return control back to the hand if we placed a unit.
-				if (didPlaceUnit) {
+				if (didPlayCard) {
 					TakeControlOfHand ();
 				}
 			}
@@ -260,8 +265,8 @@ namespace ControllerSupport {
 
 		public bool UnitSelectedOnBoard() {
 			if (handManager.GetSelectedCard () == null) {
-				string activeAbilityId = (string)typeof(BattleMode).GetField ("activeAbilityId", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
-				if (activeAbilityId != string.Empty && activeAbilityId != null) {
+				string activeAbilityId = (string)ReflectionsManager.GetValue (battleMode, "activeAbilityId");
+				if (activeAbilityId != null && activeAbilityId != string.Empty) {
 					return true;
 				}
 			}
@@ -270,17 +275,17 @@ namespace ControllerSupport {
 
 		public void ShowChat() {
 			battleMode.GetType ().GetMethod ("setChatActive", BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, new[] {typeof(bool)}, null).Invoke (battleMode, new object[] {true});
-			typeof(BattleMode).GetField ("chatLastMessageSentAtTime", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleMode, Time.time);
-			typeof(BattleMode).GetField ("fadeChat", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleMode, true);
+			ReflectionsManager.SetValue (battleMode, "chatLastMessageSentAtTime", Time.time);
+			ReflectionsManager.SetValue (battleMode, "fadeChat", true);
 		}
 
 		public void SendChatMessage(string message) {
-			battleMode.GetType ().GetMethod ("sendBattleRequest", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (battleMode, new object[] {new GameChatMessageMessage (message) });
+			ReflectionsManager.GetMethod(battleMode, "sendBattleRequest").Invoke (battleMode, new object[] {new GameChatMessageMessage (message) });
 		}
 
 		public bool TurnEnded() {
 			TileColor leftColor = (battleMode.isLeftColor(TileColor.black)) ? TileColor.black : TileColor.white;
-			TileColor activeColor = (TileColor)typeof(BattleMode).GetField ("activeColor", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleMode);
+			TileColor activeColor = (TileColor)ReflectionsManager.GetValue (battleMode, "activeColor");
 			return (activeColor != leftColor);
 		}
 
@@ -291,7 +296,7 @@ namespace ControllerSupport {
 				battleMode.tileOver (t.gameObject, tileRow, ConvertColumn());
 			}
 			// Custom colored tileOverlay (the little arrows inside a tile when you move a unit.
-			GameObject tileOverlay = (GameObject)typeof(Tile).GetField ("tileOverlay", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (t);
+			GameObject tileOverlay = (GameObject)ReflectionsManager.GetValue (t, "tileOverlay");
 			tileOverlay.renderer.material.color = new Color(.3f, 1f, .3f, .6f);
 		}
 		private void TileOut() {

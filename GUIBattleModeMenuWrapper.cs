@@ -15,15 +15,15 @@ namespace ControllerSupport {
 		}
 		public void Initialize(GUIBattleModeMenu battleModeMenu) {
 			this.battleModeMenu = battleModeMenu;
-			upMethodInfo = battleModeMenu.GetType ().GetMethod ("up", BindingFlags.NonPublic | BindingFlags.Instance);
-			downMethodInfo = battleModeMenu.GetType ().GetMethod ("down", BindingFlags.NonPublic | BindingFlags.Instance);
-			getNumMenuButtonsMethodInfo = battleModeMenu.GetType ().GetMethod ("getNumMenuButtons", BindingFlags.NonPublic | BindingFlags.Instance);
+			upMethodInfo = ReflectionsManager.GetMethod (battleModeMenu, "up");
+			downMethodInfo = ReflectionsManager.GetMethod (battleModeMenu, "down");
+			getNumMenuButtonsMethodInfo = ReflectionsManager.GetMethod (battleModeMenu, "getNumMenuButtons");
 		}
 
 		public void HandleInput(string inputType) {
 			switch (inputType) {
 			case "Accept":
-				typeof(GUIBattleModeMenu).GetField ("menuPendingConfirm", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleModeMenu, true);
+				ReflectionsManager.SetValue (battleModeMenu, "menuPendingConfirm", true);
 				break;
 			case "Cancel":
 				battleModeMenu.toggleMenu ();
@@ -33,15 +33,15 @@ namespace ControllerSupport {
 				if (GetMenuState() == EMenuState.MAIN || GetMenuState() == EMenuState.CONTROL_SCHEME) {
 					if (!highlightingControlScheme) {
 						// Check if we are about to go over the regular last item in the normal menu, if so highlight our custom control scheme button instead.
-						int menuCurrentSelection = (int)typeof(GUIBattleModeMenu).GetField ("menuCurrentSelection", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleModeMenu);
+						int menuCurrentSelection = (int)ReflectionsManager.GetValue (battleModeMenu, "menuCurrentSelection");
 						if (menuCurrentSelection == 0) {
-							typeof(GUIBattleModeMenu).GetField ("menuCurrentSelection", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleModeMenu, -1);
+							ReflectionsManager.SetValue (battleModeMenu, "menuCurrentSelection", -1);
 							highlightingControlScheme = true;
 						} else {
 							upMethodInfo.Invoke (battleModeMenu, new object[] { });
 						}
 					} else {
-						typeof(GUIBattleModeMenu).GetField ("menuCurrentSelection", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleModeMenu, getNumMenuButtonsMethodInfo.Invoke(battleModeMenu, new object[]{}));
+						ReflectionsManager.SetValue(battleModeMenu, "menuCurrentSelection", getNumMenuButtonsMethodInfo.Invoke(battleModeMenu, new object[]{}));
 						upMethodInfo.Invoke (battleModeMenu, new object[] { });
 						highlightingControlScheme = false;
 					}
@@ -53,9 +53,9 @@ namespace ControllerSupport {
 				if (GetMenuState() == EMenuState.MAIN || GetMenuState() == EMenuState.CONTROL_SCHEME) {
 					if (!highlightingControlScheme) {
 						// Check if we are about to go over the regular last item in the normal menu, if so highlight our custom control scheme button instead.
-						int menuCurrentSelection = (int)typeof(GUIBattleModeMenu).GetField ("menuCurrentSelection", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleModeMenu);
+						int menuCurrentSelection = (int)ReflectionsManager.GetValue(battleModeMenu, "menuCurrentSelection");
 						if (menuCurrentSelection + 1 == (int)getNumMenuButtonsMethodInfo.Invoke(battleModeMenu, new object[]{})) {
-							typeof(GUIBattleModeMenu).GetField ("menuCurrentSelection", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleModeMenu, -1);
+							ReflectionsManager.SetValue(battleModeMenu, "menuCurrentSelection", -1);
 							highlightingControlScheme = true;
 						} else {
 							downMethodInfo.Invoke (battleModeMenu, new object[] { });
@@ -72,7 +72,7 @@ namespace ControllerSupport {
 		}
 
 		private void ResetHighlight() {
-			typeof(GUIBattleModeMenu).GetField ("menuCurrentSelection", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (battleModeMenu, 0);
+			ReflectionsManager.SetValue (battleModeMenu, "menuCurrentSelection", 0);
 			highlightingControlScheme = false;
 		}
 
@@ -80,7 +80,7 @@ namespace ControllerSupport {
 			if (highlightingControlScheme) {
 				return EMenuState.CONTROL_SCHEME;
 			} else {
-				return (EMenuState)typeof(GUIBattleModeMenu).GetField ("menuState", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (battleModeMenu);
+				return (EMenuState)ReflectionsManager.GetValue (battleModeMenu, "menuState");
 			}
 		}
 
