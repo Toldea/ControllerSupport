@@ -45,7 +45,7 @@ namespace ControllerSupport
 		}
 
 		public static int GetVersion () {
-			return 1;
+			return 2;
 		}
 
 		public static MethodDefinition[] GetHooks(TypeDefinitionCollection scrollsTypes, int version) {
@@ -199,8 +199,12 @@ namespace ControllerSupport
 					if (Input.GetKeyUp (controllerBindings.Y)) {
 						HandleBattleModeInput ("SacEnergy");
 					}
-					// Sacrifice for Scrolls
+					// Sacrifice for Decay
 					if (Input.GetKeyUp (controllerBindings.B)) {
+						HandleBattleModeInput ("SacDecay");
+					}
+					// Sacrifice for Scrolls
+					if (Input.GetKeyUp (controllerBindings.RB)) {
 						HandleBattleModeInput ("Cycle");
 					}
 				}
@@ -555,6 +559,9 @@ namespace ControllerSupport
 				break;
 			case "SacEnergy":
 				handManager.UseActiveCard ("energy", battleMode.GetResourceTypes());
+				break;
+			case "SacDecay":
+				handManager.UseActiveCard ("decay", battleMode.GetResourceTypes());
 				break;
 			case "Cycle":
 				handManager.UseActiveCard ("cycle");

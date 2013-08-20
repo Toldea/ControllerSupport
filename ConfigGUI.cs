@@ -15,6 +15,11 @@ namespace ControllerSupport {
 					App.Popups.ShowOk(this, "new_install", "Welcome to ControllerSupport", "Control the game and the Arena menu with your controller!\n\nThis mod supports Xbox 360 controllers natively and PS3 controllers through MotionJoy (set to Xbox Emulator mode).\n\nReview the controls at any time in the Settings or ingame menu.", "Controls");
 				}
 			} else if (configManager.IsNewVersion (version)) {
+				if (OsSpec.getOS () == OSType.OSX && configManager.UsingPS3 ()) {
+					App.Popups.ShowOk (this, "updated_install", "ControllerSupport has been updated!", "ControllerSupport has been updated for the Decay resource!\n\nL1 + Circle now sacrifices for Decay.\nSacrificing for scrolls has been moved to L1 + R1.", "Ok");
+				} else {
+					App.Popups.ShowOk (this, "updated_install", "ControllerSupport has been updated!", "ControllerSupport has been updated for the Decay resource!\n\nLB + B now sacrifices for Decay.\nSacrificing for scrolls has been moved to LB + RB.", "Ok");
+				}
 				//Console.WriteLine ("ControllerSupport: ConfigManager: New version detected!");
 			} else {
 				//Console.WriteLine ("ControllerSupport: ConfigManager: Version up to date!");
@@ -59,7 +64,8 @@ namespace ControllerSupport {
 					                           "\nL1 + X: Sacrifice for Growth\n" +
 					                           "L1 + Square: Sacrifice for Order\n" +
 					                           "L1 + Triangle: Sacrifice for Energy\n" +
-					                           "L1 + Circle: Sacrifce for Scrolls\n" +
+					                           "L1 + Circle: Sacrifce for Decay\n" +
+					                           "L1 + R1: Sacrifce for Scrolls\n" +
 					                           "R1: Magnify selected Scroll\n" +
 					                           "\nLeft Stick Click: Take control of the board\n" +
 					                           "Right Stick Click: Toggle show stats\n" +
@@ -88,7 +94,8 @@ namespace ControllerSupport {
 					                           "\nLB + A: Sacrifice for Growth\n" +
 					                           "LB + X: Sacrifice for Order\n" +
 					                           "LB + Y: Sacrifice for Energy\n" +
-					                           "LB + B: Sacrifce for Scrolls\n" +
+					                           "LB + B: Sacrifce for Decay\n" +
+					                           "LB + RB: Sacrifce for Scrolls\n" +
 					                           "RB: Magnify selected Scroll\n" +
 					                           "\nLeft Stick Click: Take control of the board\n" +
 					                           "Right Stick Click: Toggle show stats\n" +
@@ -118,7 +125,8 @@ namespace ControllerSupport {
 				                           "\nLB + A: Sacrifice for Growth\n" +
 				                           "LB + X: Sacrifice for Order\n" +
 				                           "LB + Y: Sacrifice for Energy\n" +
-				                           "LB + B: Sacrifce for Scrolls\n" +
+				                           "LB + B: Sacrifce for Decay\n" +
+				                           "LB + RB: Sacrifce for Scrolls\n" +
 				                           "RB: Magnify selected Scroll\n" +
 				                           "\nLeft Stick Click: Take control of the board\n" +
 				                           "Right Stick Click: Toggle show stats\n" +

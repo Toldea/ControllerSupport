@@ -92,7 +92,7 @@ namespace ControllerSupport {
 			CardActivator cardActivator = (CardActivator)typeof(HandManager).GetField ("cardActivator", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (handManager);
 			if (cardActivator != null) {
 				bool allowAction = true;
-				if (action == "growth" || action == "order" || action == "energy") {
+				if (action == "growth" || action == "order" || action == "energy" || action == "decay") {
 					allowAction = CanSacrificeForResource (action, resTypes);
 				}
 				if (allowAction) {
@@ -177,6 +177,11 @@ namespace ControllerSupport {
 					break;
 				case "energy":
 					if (type == ResourceType.ENERGY) {
+						return true;
+					}
+					break;
+				case "decay":
+					if (type == ResourceType.DECAY) {
 						return true;
 					}
 					break;
