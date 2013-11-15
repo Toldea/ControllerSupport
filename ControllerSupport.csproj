@@ -45,11 +45,11 @@
     <Reference Include="JsonFx">
       <HintPath>..\JsonFx.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\Assembly-CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="ScrollsModLoader.Interfaces">
       <HintPath>..\ScrollsModLoader.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\Assembly-CSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

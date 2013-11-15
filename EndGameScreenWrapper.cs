@@ -18,7 +18,7 @@ namespace ControllerSupport {
 			this.endGameScreen = endGameScreen;
 		}
 		public bool isActive() {
-			return (endGameScreen.isInited () && !endGameScreen.isDone());
+			return (endGameScreen != null && endGameScreen.isInited () && !endGameScreen.isDone());
 		}
 		public bool isDone() {
 			return endGameScreen.isDone ();

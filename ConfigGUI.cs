@@ -16,9 +16,9 @@ namespace ControllerSupport {
 				}
 			} else if (configManager.IsNewVersion (version)) {
 				if (OsSpec.getOS () == OSType.OSX && configManager.UsingPS3 ()) {
-					App.Popups.ShowOk (this, "updated_install", "ControllerSupport has been updated!", "ControllerSupport has been updated for the Decay resource!\n\nL1 + Circle now sacrifices for Decay.\nSacrificing for scrolls has been moved to L1 + R1.", "Ok");
+					App.Popups.ShowOk (this, "updated_install", "ControllerSupport has been updated!", "ControllerSupport has been updated to work with the latest version!", "Ok");
 				} else {
-					App.Popups.ShowOk (this, "updated_install", "ControllerSupport has been updated!", "ControllerSupport has been updated for the Decay resource!\n\nLB + B now sacrifices for Decay.\nSacrificing for scrolls has been moved to LB + RB.", "Ok");
+					App.Popups.ShowOk (this, "updated_install", "ControllerSupport has been updated!", "ControllerSupport has been updated to work with the latest version!", "Ok");
 				}
 				//Console.WriteLine ("ControllerSupport: ConfigManager: New version detected!");
 			} else {

@@ -56,9 +56,9 @@ namespace ControllerSupport {
 			}
 
 			if (shouldDrawSeletionIndicator && selectedIndex > -1) {
-				currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-				string okText = (string)typeof(Popups).GetField ("okText", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
-				string cancelText = (string)typeof(Popups).GetField ("cancelText", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				currentPopupType = (PopupType)ReflectionsManager.GetValue (popups, "currentPopupType");
+				string okText = (string)ReflectionsManager.GetValue (popups, "okText");
+				string cancelText = (string)ReflectionsManager.GetValue (popups, "cancelText");
 
 				if (this.currentPopupType != PopupType.NONE) {
 					GUI.depth = 4;
@@ -101,7 +101,7 @@ namespace ControllerSupport {
 							}
 						} else {
 							if (currentPopupType == PopupType.MULTIBUTTON) {
-								string[] buttonList = (string[])typeof(Popups).GetField ("buttonList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+								string[] buttonList = (string[])ReflectionsManager.GetValue (popups, "buttonList");
 								float num5 = (float)Screen.height * 0.05f;
 								float num6 = num5 + (float)Screen.height * 0.02f;
 								Rect r4 = new Rect ((float)Screen.width * 0.5f - (float)Screen.height * 0.1f, rect2.y + rect2.height * 0.55f - ((float)buttonList.Length / 2f - (float)selectedIndex) * num6 + (num6 - num5), (float)Screen.height * 0.2f, num5);
@@ -327,16 +327,16 @@ namespace ControllerSupport {
 			if (selectedIndex < 0) { 
 				return;
 			}
-			string[] buttonList = (string[])typeof(Popups).GetField ("buttonList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+			string[] buttonList = (string[])ReflectionsManager.GetValue (popups, "buttonList");
 			if (selectedIndex >= buttonList.Length) {
 				return;
 			}
 			App.AudioScript.PlaySFX ("Sounds/hyperduck/UI/ui_button_click");
-			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+			currentPopupType = (PopupType)ReflectionsManager.GetValue (popups, "currentPopupType");
 			HidePopupMethodInfo.Invoke (popups, new object[] { });
-			IOkStringCallback callback = ((IOkStringCallback)typeof(Popups).GetField ("okStringCallback", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups));
+			IOkStringCallback callback = (IOkStringCallback)ReflectionsManager.GetValue (popups, "okStringCallback");
 			if (callback != null) {
-				string popupType = (string)typeof(Popups).GetField ("popupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				string popupType = (string)ReflectionsManager.GetValue(popups, "popupType");
 				callback.PopupOk(popupType, buttonList[selectedIndex]);
 			}
 		}
@@ -387,7 +387,8 @@ namespace ControllerSupport {
 		}
 
 		private void MoveSelectionIndicator(Movement movement) {
-			currentPopupType = (PopupType)typeof(Popups).GetField ("currentPopupType", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+			currentPopupType = (PopupType)ReflectionsManager.GetValue (popups, "currentPopupType");
+
 			shouldDrawSeletionIndicator = true;
 
 			if (currentPopupType == PopupType.OK_CANCEL) {
@@ -397,7 +398,7 @@ namespace ControllerSupport {
 					selectedIndex = 1;
 				}
 			} else if (currentPopupType == PopupType.MULTIBUTTON) {
-				int numButtons = ((string[])typeof(Popups).GetField ("buttonList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups)).Length;
+				int numButtons = ((string[])ReflectionsManager.GetValue(popups, "buttonList")).Length;
 				if (movement == Movement.Up) {
 					selectedIndex--;
 					if (selectedIndex < 0) {
@@ -412,7 +413,7 @@ namespace ControllerSupport {
 					}
 				}
 			} else if (currentPopupType == PopupType.DECK_SELECTOR) {
-				List<DeckInfo> deckList = (List<DeckInfo>)typeof(Popups).GetField ("deckList", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				List<DeckInfo> deckList = (List<DeckInfo>)ReflectionsManager.GetValue (popups, "deckList");
 				int listCount = deckList.Count;
 
 				if (movement == Movement.Up) {
@@ -455,7 +456,7 @@ namespace ControllerSupport {
 				if (deckScroll.y < 0f) {
 					deckScroll.y = 0f;
 				}
-				typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (this.popups, deckScroll);
+				ReflectionsManager.SetValue (this.popups, "deckScroll", deckScroll);
 			} else if (currentPopupType == PopupType.TOWER_CHALLENGE_SELECTOR) {
 				TowerLevels[] levels = App.TowerChallengeInfo.levels;
 				if (movement == Movement.Up) {
@@ -468,7 +469,7 @@ namespace ControllerSupport {
 					}
 				}
 				// Set the selectedIndex as the selectedChallengeID.
-				typeof(Popups).GetField ("selectedChallengeID", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (popups, selectedIndex);
+				ReflectionsManager.SetValue (popups, "selectedChallengeID", selectedIndex);
 				// Calculate the scroll view height.
 				float scollViewHeight = Screen.height * 0.8f;
 				float num = (float)Screen.height * 0.03f;
@@ -479,13 +480,13 @@ namespace ControllerSupport {
 				// Calculate the total scroll size height.
 				float scrollSizeHeight = levels.Length * 55;
 				// Set the scroll position relative to the selected item.
-				Vector2 deckScroll = (Vector2)typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (popups);
+				Vector2 deckScroll = (Vector2)ReflectionsManager.GetValue (popups, "deckScroll");
 				deckScroll.y = (levels.Length - (levels.Length - selectedIndex)) * (scrollSizeHeight / levels.Length);
 				deckScroll.y -= (scollViewHeight - 55f);
 				if (deckScroll.y < 0f) {
 					deckScroll.y = 0f;
 				}
-				typeof(Popups).GetField ("deckScroll", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (this.popups, deckScroll);
+				ReflectionsManager.SetValue (popups, "deckScroll", deckScroll);
 			}
 		}
 
@@ -493,6 +494,7 @@ namespace ControllerSupport {
 		private enum PopupType {
 			NONE,
 			OK_CANCEL,
+			OK_CHOICE_CANCEL,
 			OK,
 			MULTIBUTTON,
 			DECK_SELECTOR,
@@ -504,7 +506,9 @@ namespace ControllerSupport {
 			TOWER_CHALLENGE_SELECTOR,
 			GOLD_SHARDS_SELECT,
 			PURCHASE_PASSWORD_ENTRY,
-			SCROLL_TEXT
+			TEXT_ENTRY,
+			SCROLL_TEXT,
+			TEXT_IMAGE
 		}
 	}
 }

@@ -104,7 +104,6 @@ namespace ControllerSupport {
 
 		public void HandleInput(string inputType) {
 			int currentSceneIndex = GetCurrentSceneIndex (GetCurrentSceneName());
-
 			// Arena/'Lobby' Scene specific Input Handling.
 			if (currentSceneIndex == 1) {
 				switch (inputType) {
@@ -122,7 +121,6 @@ namespace ControllerSupport {
 					break;
 				}
 			}
-
 			// Generic Input Handling.
 			switch (inputType) {
 			case "NextScene":
@@ -155,7 +153,7 @@ namespace ControllerSupport {
 					invites[i].inviteActive = true;
 					if (invites[i].message is GameMatchMessage) {
 						string text = "ranked";
-						if (invites[i].gameType == "MP_QUICKMATCH") {
+						if (invites[i].gameType == GameType.MP_QUICKMATCH) {
 							text = "quick";
 						}
 						App.Popups.ShowOkCancel (App.InviteManager, "joingame", "Join game", "A " + text + " match has been found", "Join", "Decline");

@@ -60,14 +60,17 @@ namespace ControllerSupport {
 			spellList.Sort(delegate(Transform spellObject1, Transform spellObject2) {
 				CardView spell1CardView = spellObject1.GetComponent<CardView> ();
 				CardView spell2CardView = spellObject2.GetComponent<CardView> ();
-				float spell1StartTime = (float)ReflectionsManager.GetValue(spell1CardView, "startTime");
-				float spell2StartTime = (float)ReflectionsManager.GetValue(spell2CardView, "startTime");
+				//float spell1StartTime = (float)ReflectionsManager.GetValue(spell1CardView, "startTime");
+				float spell1StartTime = (float)ReflectionsManager.GetValue(spell1CardView, "timeStamp");
+				//float spell2StartTime = (float)ReflectionsManager.GetValue(spell2CardView, "startTime");
+				float spell2StartTime = (float)ReflectionsManager.GetValue(spell2CardView, "timeStamp");
 				return (spell2StartTime.CompareTo(spell1StartTime));
 			});
 
 			// Get the timestamp from the most currently played card.
 			CardView lastPlayedCard = spellList[0].GetComponent<CardView>();
-			float newLastPlayedCardTimeStamp = (float)ReflectionsManager.GetValue (lastPlayedCard, "startTime");
+			//float newLastPlayedCardTimeStamp = (float)ReflectionsManager.GetValue (lastPlayedCard, "startTime");
+			float newLastPlayedCardTimeStamp = (float)ReflectionsManager.GetValue (lastPlayedCard, "timeStamp");
 			int viewingCardIndex = 0;
 			// If we don't have a valid lastPlayedCard time stamp or if a newer card has been played since then, set our currently viewing card stamp to the latest card stamp.
 			if (lastPlayedCardTimeStamp < .0f || lastPlayedCardTimeStamp < newLastPlayedCardTimeStamp) {
@@ -80,7 +83,8 @@ namespace ControllerSupport {
 				for (int i = 1; i < spellList.Count; i++) {
 					// Loop through each spell until we hit one with a time stamp earlier as our viewingCardTimeStamp.
 					CardView cv = spellList [i].GetComponent<CardView>();
-					timeStamp = (float)ReflectionsManager.GetValue (cv, "startTime");
+					//timeStamp = (float)ReflectionsManager.GetValue (cv, "startTime");
+					timeStamp = (float)ReflectionsManager.GetValue (cv, "timeStamp");
 					if (timeStamp < viewingCardTimeStamp) {
 						viewingCardTimeStamp = timeStamp;
 						viewingCardIndex = i;
@@ -298,7 +302,7 @@ namespace ControllerSupport {
 			Tile t = GetTile ();
 
 			if (t != null) {
-				battleMode.tileOver (t.gameObject, tileRow, ConvertColumn());
+				battleMode.tileOver (t, tileRow, ConvertColumn());
 			}
 			// Custom colored tileOverlay (the little arrows inside a tile when you move a unit.
 			GameObject tileOverlay = (GameObject)ReflectionsManager.GetValue (t, "tileOverlay");

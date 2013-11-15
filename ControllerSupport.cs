@@ -45,7 +45,7 @@ namespace ControllerSupport
 		}
 
 		public static int GetVersion () {
-			return 2;
+			return 3;
 		}
 
 		public static MethodDefinition[] GetHooks(TypeDefinitionCollection scrollsTypes, int version) {
@@ -168,7 +168,7 @@ namespace ControllerSupport
 
 		private void HandleBattleModeControls() {
 			// If the end screen is linked and it 'active', disable battle mode controls.
-			if (endGameScreen.isActive ()) {
+			if (endGameScreen != null && endGameScreen.isActive ()) {
 				return;
 			}
 			// Toggle Show Menu
