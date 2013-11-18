@@ -22,7 +22,7 @@ namespace ControllerSupport {
 
 		private void Initialize(HandManager handManager) {
 			this.handManager = handManager;
-			getCardViewByIdMethodInfo = handManager.GetType().GetMethod("GetCardViewById", BindingFlags.NonPublic | BindingFlags.Instance);
+			getCardViewByIdMethodInfo = ReflectionsManager.GetMethod (handManager, "GetCardViewById");
 			activeCardID = -1L;
 			nextCardReserved = false;
 		}
@@ -34,19 +34,27 @@ namespace ControllerSupport {
 			// We play 2, 3 gets reserved and set as active (since otherwise we lose our index)
 			// If we would not reserve and we press right, we immediatly jump to card 4 which feels unnatural.
 			// Similarely if the displacement is -1 we DO want to ignore the reservation and select card 1.
+			Console.WriteLine ("A");
 			if (displacement == 1 && nextCardReserved) {
 				nextCardReserved = false;
 				return;
 			}
+			Console.WriteLine ("B");
 			CardView nextCard = GetCardViewById(GetNextCard(displacement));
+			Console.WriteLine ("C");
 			// Select the first card in hand if we had no previously selected card.
 			if (nextCard == null) {
-				nextCard = handManager.GetCardViewsInHand () [0];
+				List<CardView> cardViews = handManager.GetCardViewsInHand ();
+				if (cardViews.Count > 0) {
+					nextCard =  cardViews[0];
+				}
 			}
+			Console.WriteLine ("D");
 			// If we have a valid card to select, save it as the active card.
 			if (nextCard != null) {
 				activeCardID = nextCard.getCardInfo ().getId ();
 			}
+			Console.WriteLine ("E");
 		}
 		private long GetNextCard(int displacement) {
 			CardView nextCard = null;
@@ -78,10 +86,10 @@ namespace ControllerSupport {
 		}
 
 		public void MagnifySelected() {
-			CardView magnifiedCard = (CardView)typeof(HandManager).GetField ("magnifiedCard", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (handManager);
+			CardView magnifiedCard = (CardView)ReflectionsManager.GetValue (handManager, "magnifiedCard");
 			// If a magnifiedCard already exists, destroy it. Else check if we have a valid selected card and then magnify it.
 			if (magnifiedCard != null ) {
-				handManager.GetType ().GetMethod ("DestroyMagnified", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (handManager, new object[] {});
+				ReflectionsManager.GetMethod (handManager, "DestroyMagnified").Invoke (handManager, new object[] {});
 				handManager.DeselectCard ();
 			} else if (handManager.GetSelectedCard () != null) {
 				handManager.MagnifySelected ();
@@ -89,7 +97,7 @@ namespace ControllerSupport {
 		}
 
 		public void UseActiveCard(string action, ResourceType[] resTypes = null) {
-			CardActivator cardActivator = (CardActivator)typeof(HandManager).GetField ("cardActivator", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (handManager);
+			CardActivator cardActivator = (CardActivator)ReflectionsManager.GetValue (handManager, "cardActivator");
 			if (cardActivator != null) {
 				bool allowAction = true;
 				if (action == "growth" || action == "order" || action == "energy" || action == "decay") {
@@ -99,7 +107,7 @@ namespace ControllerSupport {
 					// Try to reserve the next card.
 					ReserveNextCard ();
 					// Use the currently active card.
-					cardActivator.GetType ().GetMethod ("iconClicked", BindingFlags.NonPublic | BindingFlags.Instance).Invoke (cardActivator, new object[] { action });
+					ReflectionsManager.GetMethod (cardActivator, "iconClicked").Invoke (cardActivator, new object[] { action });
 				}
 			}
 		}
@@ -132,8 +140,8 @@ namespace ControllerSupport {
 			CardView selectedCard = handManager.GetSelectedCard ();
 			// Check if we have a valid selected card.
 			if (selectedCard != null) {
-				CardActivator cardActivator = (CardActivator)typeof(HandManager).GetField ("cardActivator", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (handManager);
-				GameObject playIcon = (GameObject)typeof(CardActivator).GetField ("playIcon", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (cardActivator);
+				CardActivator cardActivator = (CardActivator)ReflectionsManager.GetValue (handManager, "cardActivator");
+				GameObject playIcon = (GameObject)ReflectionsManager.GetValue (cardActivator, "playIcon");
 				if (playIcon != null) {
 					return true;
 				}
